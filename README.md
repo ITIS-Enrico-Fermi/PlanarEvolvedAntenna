@@ -1,7 +1,7 @@
 # Path Evolved Antenna
 2-dimensional patch antenna optimized with genetic algorithms.
 
-## Objectives
+## Objectives
 The main goal of this project is simulating the evolution of a patch antenna subject to space and shape constraints, in order to maximize isotropic gain and minimize backlobes propagation. The simulation is carried out through a genetic algorithm framed as described in the following paragraphs.
 
 ### Problem representation
