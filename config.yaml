@@ -6,6 +6,7 @@ shape_constraints:  # the unit of measure is mm
 
 genetic_algo_tuning:
   population_size: 100
+  turnover_rate: 0.5
   iterations_number: 10e3
   mutation_rate: 0.3
   cut_points: 1

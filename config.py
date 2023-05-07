@@ -12,6 +12,7 @@ class Config:
     iterationsNumber: int
     cutPoints: int
     mutationRate: float
+    turnoverRate: float
 
   class GeneEncoding:
     segmentsNumber: int
@@ -23,10 +24,11 @@ class Config:
     Config.ShapeConstraints.innerDiam = d["shape_constraints"]["inner_diameter"]
     Config.ShapeConstraints.centerShift = d["shape_constraints"]["center_shift"]
 
-    Config.GeneticAlgoTuning.centerShift = d["genetic_algo_tuning"]["population_size"]
-    Config.GeneticAlgoTuning.centerShift = d["genetic_algo_tuning"]["iterations_number"]
-    Config.GeneticAlgoTuning.centerShift = d["genetic_algo_tuning"]["mutation_rate"]
-    Config.GeneticAlgoTuning.centerShift = d["genetic_algo_tuning"]["cut_points"]
+    Config.GeneticAlgoTuning.populationSize = d["genetic_algo_tuning"]["population_size"]
+    Config.GeneticAlgoTuning.iterationsNumber = d["genetic_algo_tuning"]["iterations_number"]
+    Config.GeneticAlgoTuning.cutPoints = d["genetic_algo_tuning"]["mutation_rate"]
+    Config.GeneticAlgoTuning.mutationRate = d["genetic_algo_tuning"]["cut_points"]
+    Config.GeneticAlgoTuning.turnoverRate = d["genetic_algo_tuning"]["turnover_rate"]
 
-    Config.GeneEncoding.centerShift = d["gene_encoding"]["segments_number"]
-    Config.GeneEncoding.centerShift = d["gene_encoding"]["spline_interpolation"]
+    Config.GeneEncoding.segmentsNumber = d["gene_encoding"]["segments_number"]
+    Config.GeneEncoding.splineInterpolation = d["gene_encoding"]["spline_interpolation"]
