@@ -1,24 +1,11 @@
-import matplotlib
+from config import Config
 import numpy as np
 from typing import List
 
-POP_SIZE  = 100
-
-ITERATIONS_NUMBER = 10^3
-SEGMENTS_NUMBER = 5
-
-CUT_POINTS = 1
-MUTATION_RATE = 0.3
-
-OUTER_DIAM = 66  # < mm
-INNER_DIAM = 7  # < mm
-CENTER_SHIFT = 5.6  # < mm
-
 class Gene:
   def __init__(self):
-    self.segmentLengths = np.random.rand(SEGMENTS_NUMBER)  * OUTER_DIAM / (SEGMENTS_NUMBER * 4)
-    self.revolutionAngles = np.random.rand(SEGMENTS_NUMBER - 1) * np.pi # 1 joint every segments' couple
-    self.originTranslation = 0
+    self.segmentLengths = np.random.rand(Config.GeneEncoding.segmentsNumber)  * Config.ShapeConstraints.outerDiam / (Config.GeneEncoding.segmentsNumber * 4)
+    self.revolutionAngles = np.random.rand(Config.GeneEncoding.segmentsNumber - 1) * np.pi # 1 joint every segments' couple
 
   def isValid(self) -> bool:
     """Returns true if the path is not slef-intersecting
@@ -32,17 +19,19 @@ class Gene:
 
 class Generation:
   def __init__(self):
-    self.genes = [Gene() for _ in range(POP_SIZE)]
+    self.population = [Gene() for _ in range(Config.GeneticAlgoTuning.populationSize)]
 
   def iterate(self) -> List[Gene]:
-    for _ in range(ITERATIONS_NUMBER):
+    for _ in range(Config.GeneticAlgoTuning.iterationsNumber):
       self.fight()
       self.crossover()
       self.mutate()
-      yield self.genes
+      yield self.population
+
 
 def main():
   ...
+
 
 if __name__ == "__main__":
   main()
