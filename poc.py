@@ -13,6 +13,8 @@ class Gene:
     
     self.revolutionAngles = \
       (np.random.rand(Config.GeneEncoding.segmentsNumber - 1) - 0.5) * np.pi # 1 joint every segments' couple
+    
+
 
   def __lt__(self, other) -> bool:
     return self.fitness() < other.fitness()
@@ -59,13 +61,24 @@ class Population:
       self.population
     )
 
-    newGenerationSize = Config.GeneticAlgoTuning.turnoverRate * Config.GeneticAlgoTuning.populationSize
-    self.population = sorted(self.population)[ : int(newGenerationSize)]
+    survivedGenesNumber = int(Config.GeneticAlgoTuning.turnoverRate * Config.GeneticAlgoTuning.populationSize)
+    self.population = sorted(self.population)[ : survivedGenesNumber]
   
   def crossover(self):
     jointsNumber = Config.GeneEncoding.segmentsNumber - 1
-    cutpointIdx = randrange(jointsNumber)
-
+    newGenerationSize = (1 - Config.GeneticAlgoTuning.turnoverRate) * Config.GeneticAlgoTuning.populationSize
+    
+    for _ in range(newGenerationSize):
+      cutpointIdx = randrange(jointsNumber)
+      momGeneIdx = randrange(len(self.population))
+      dadGeneIdx = randrange(len(self.population))
+      momGene = self.population[momGeneIdx]
+      dadGene = self.population[dadGeneIdx]
+      newGene = np.concatenate((
+        momGene[:cutpointIdx],
+        dadGene[cutpointIdx:]
+      ))
+      self.population.append(newGene)
   
   def mutate(self):
     ...
