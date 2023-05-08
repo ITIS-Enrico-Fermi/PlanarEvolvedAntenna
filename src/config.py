@@ -21,9 +21,9 @@ class Config:
     splineInterpolation: bool
     maxAngle: float
     maxSegmentLen: float
+    minSegmentLen: float
 
   def loadYaml(stream: TextIO):
-    loader = yaml.SafeLoader
     d = yaml.safe_load(stream)
     
     Config.ShapeConstraints.outerDiam = d["shape_constraints"]["outer_diameter"]
@@ -41,3 +41,4 @@ class Config:
     Config.GeneEncoding.splineInterpolation = d["gene_encoding"]["spline_interpolation"]
     Config.GeneEncoding.maxAngle = d["gene_encoding"]["max_angle"]
     Config.GeneEncoding.maxSegmentLen = d["gene_encoding"]["max_segment_length"]
+    Config.GeneEncoding.minSegmentLen = d["gene_encoding"]["min_segment_length"]

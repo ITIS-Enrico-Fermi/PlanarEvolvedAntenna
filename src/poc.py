@@ -1,6 +1,6 @@
 import argparse
 import numpy as np
-from utils import plotPath
+from utils import PolarCoord, plotPath
 from math import ceil, floor
 from random import randrange
 from config import Config
@@ -9,7 +9,7 @@ from typing import List, Tuple
 CONFIG_FILENAME = "config.yaml"
 
 class Gene:
-  def __init__(self, encodedGene: List[Tuple[float, float]] = None):
+  def __init__(self, encodedGene: List[PolarCoord] = None):
     if (encodedGene is not None):
       self.encoding = encodedGene
       return
@@ -17,10 +17,13 @@ class Gene:
     revolutionAngles = (np.random.rand(Config.GeneEncoding.segmentsNumber) - 0.5) * \
       Config.GeneEncoding.maxAngle
     
-    segmentLengths = np.random.rand(Config.GeneEncoding.segmentsNumber)  * \
-      Config.GeneEncoding.maxSegmentLen
+    segmentLengths = np.random.uniform(
+      low = Config.GeneEncoding.minSegmentLen,
+      high = Config.GeneEncoding.maxSegmentLen,
+      size = Config.GeneEncoding.segmentsNumber)
 
     self.encoding = list(zip(revolutionAngles, segmentLengths))
+    self.encoding = [PolarCoord(a, l) for (a, l) in self.encoding]
 
   def __lt__(self, other) -> bool:
     return self.fitness() < other.fitness()
@@ -29,13 +32,16 @@ class Gene:
     res = "<"
     lastItemIdx = len(self.encoding) - 1
     for i in range(lastItemIdx):
-      res += f"{self.encoding[i][0]} deg - {self.encoding[i][1]} mm - "
-    res += f"{self.encoding[lastItemIdx][0]} deg - {self.encoding[lastItemIdx][1]} mm>"
+      res += f"{self.encoding[i].angle} deg - {self.encoding[i].distance} mm - "
+    res += f"{self.encoding[lastItemIdx].angle} deg - {self.encoding[lastItemIdx].distance} mm>"
 
     return res
   
   def __getitem__(self, itemIdx):
     return self.encoding[itemIdx]
+  
+  def getPolarCoords(self):
+    return self.encoding
 
   def isValid(self) -> bool:
     """Returns true if the path is not slef-intersecting
@@ -99,7 +105,8 @@ def main(doPlot: bool):
     print(epoch, generation)
 
     if doPlot:
-      plotPath(f"Epoch: {epoch}", generation)
+      import matplotlib.pyplot as plt
+      plotPath(f"Epoch: {epoch}", sorted(generation)[0].getPolarCoords())  # Plot only best performing individual
 
 if __name__ == "__main__":
   parser = argparse.ArgumentParser(
