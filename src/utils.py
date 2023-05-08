@@ -67,7 +67,7 @@ def plotPath(title: str, polarCoords: List[Tuple[float, float]]) -> None:
       )
     
     lines = [line.toList() for line in segments]
-    lineCollection = mc.LineCollection(lines, linewidths=3)
+    lineCollection = mc.LineCollection(lines, linewidths=3, color="#4caf50")
     ax.add_collection(lineCollection)
 
   plotCansatBottomProfile()
