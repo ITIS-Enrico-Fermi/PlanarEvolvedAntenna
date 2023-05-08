@@ -6,13 +6,15 @@ shape_constraints:  # the unit of measure is mm
   target_frequency: 868.0e+6
 
 genetic_algo_tuning:
-  population_size: 100
+  population_size: 10
   turnover_rate: 0.5
-  iterations_number: 1000
+  iterations_number: 5
   mutation_rate: 0.3
   cut_points: 1
 
 gene_encoding:
-  segments_number: 5
+  segments_number: 3
   spline_interpolation: false
+  max_angle: 1.57  # rad
+  max_segment_length: 4.0  # mm
 ...

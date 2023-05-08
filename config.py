@@ -19,6 +19,8 @@ class Config:
   class GeneEncoding:
     segmentsNumber: int
     splineInterpolation: bool
+    maxAngle: float
+    maxSegmentLen: float
 
   def loadYaml(stream: TextIO):
     loader = yaml.SafeLoader
@@ -37,3 +39,5 @@ class Config:
 
     Config.GeneEncoding.segmentsNumber = d["gene_encoding"]["segments_number"]
     Config.GeneEncoding.splineInterpolation = d["gene_encoding"]["spline_interpolation"]
+    Config.GeneEncoding.maxAngle = d["gene_encoding"]["max_angle"]
+    Config.GeneEncoding.maxSegmentLen = d["gene_encoding"]["max_segment_length"]
