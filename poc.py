@@ -1,4 +1,6 @@
+import argparse
 import numpy as np
+from utils import plotPath
 from math import ceil, floor
 from random import randrange
 from config import Config
@@ -88,14 +90,27 @@ class Population:
     ...
 
 
-def main():
+def main(doPlot: bool):
   with open(CONFIG_FILENAME, "r") as f:
     Config.loadYaml(f)
     
   pop = Population()
   for generation, epoch in pop.nextGeneration():
-    print(epoch, generation) 
+    print(epoch, generation)
 
+    if doPlot:
+      plotPath(f"Epoch: {epoch}", generation)
 
 if __name__ == "__main__":
-  main()
+  parser = argparse.ArgumentParser(
+    description = "Planar evolved antenna proof-of-concept"
+  )
+
+  parser.add_argument(
+    "-p", "--plot", help="View what's happening in the simulation",
+    default=False, action="store_true"
+  )
+  
+  args = parser.parse_args()
+
+  main(args.plot)
