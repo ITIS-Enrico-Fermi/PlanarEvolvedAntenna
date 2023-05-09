@@ -25,15 +25,18 @@ class Point:
     self.x = x
     self.y = y
   
-  def __repr__(self):
+  def __repr__(self) -> str:
     return f"({self.x}, {self.y})"
+  
+  def __add__(self, other) -> Point:
+    return Point(self.x + other.x, self.y + other.y)
 
 class Segment:
   def __init__(self, start: Point, end: Point):
     self.start = start
     self.end = end
   
-  def __repr__(self):
+  def __repr__(self) -> str:
     return f"<{self.start} - {self.end}>"
   
   def toList(self) -> List[Tuple[float, float]]:
@@ -60,17 +63,17 @@ def plotPath(title: str, polarCoords: List[Tuple[float, float]]) -> None:
     ax.add_patch(innerCircle)
   
   def plotAntennaPath():
-    FIRST_POINT = Point(- Config.ShapeConstraints.outerDiam / 2, 0)
+    FIRST_POINT_CART = Point(- Config.ShapeConstraints.outerDiam / 2, 0)
     segments: List[Segment] = [
       Segment(
-        FIRST_POINT,
-        polarToCart(FIRST_POINT, polarCoords[0])
+        FIRST_POINT_CART,
+        FIRST_POINT_CART + polarToCart(polarCoords[0])
     )]
 
     for i in range(1, len(polarCoords) - 1):
       segments.append(
         Segment(
-          segments[i-1].end, polarToCart(segments[i-1].end, polarCoords[i]))
+          segments[i-1].end, segments[i-1].end + polarToCart(polarCoords[i]))
       )
     
     lines = [line.toList() for line in segments]
@@ -82,30 +85,36 @@ def plotPath(title: str, polarCoords: List[Tuple[float, float]]) -> None:
 
   plt.show()
 
-def polarToCart(startPoint: Point, polarCoord: PolarCoord) -> Point:
-  """Takes a start point and a polar coord to compute the segment's end point
-  
-  :param startPoint: a Point representing a cartesian coordinate
-  :param polarCoord: a PolarCoord representing a polar coordinate
-
-  :returns: end point of the segments connecting startPoint + polarCoord
-  """
+def polarToCart(polarCoord: PolarCoord) -> Point:
   return Point(
-    startPoint.x + np.cos(polarCoord.angle) * polarCoord.distance,
-    startPoint.y + np.sin(polarCoord.angle) * polarCoord.distance
+    np.cos(polarCoord.angle) * polarCoord.distance,
+    np.sin(polarCoord.angle) * polarCoord.distance
   )
 
-def isSelfIntersectingPath(polarCoords: List[PolarCoord]):
+def isSelfIntersectingPath(polarCoords: List[PolarCoord]) -> bool:
   # See Bentley-Ottmann for a generic approach
-  ...
+  segmentList = []
 
-def areIntersectingSegments(segment1: Segment, segment2: Segment):
+  p1 = Point(0, 0)
+  for pc in polarCoords:
+    p2 = p1 + polarToCart(pc)
+    segmentList.append(Segment(p1, p2))
+    p1 = p2
+  
+  for i in range(len(segmentList)):
+    for j in range(i+1, len(segmentList)):
+      if areIntersectingSegments(segmentList[i], segmentList[j]):
+        return True
+  
+  return False
+
+def areIntersectingSegments(segment1: Segment, segment2: Segment) -> bool:
   return (
-    areIntersectingIntervals(segment1.x, segment2.x) and
-    areIntersectingIntervals(segment1.y, segment2.y)
+    areIntersectingIntervals((segment1.start.x, segment1.end.x), (segment2.start.x, segment2.end.x)) and
+    areIntersectingIntervals((segment1.start.y, segment1.end.y), (segment2.start.y, segment2.end.y))
   )
 
-def areIntersectingIntervals(interval1: Tuple[float, float], interval2: Tuple[float, float]):
+def areIntersectingIntervals(interval1: Tuple[float, float], interval2: Tuple[float, float]) -> bool:
   return (
     interval2[0] <= interval1[1] <= interval2[1] or
     interval2[0] <= interval1[0] <= interval2[1] or
