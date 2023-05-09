@@ -28,7 +28,7 @@ class Point:
   def __repr__(self) -> str:
     return f"({self.x}, {self.y})"
   
-  def __add__(self, other) -> Point:
+  def __add__(self, other):
     return Point(self.x + other.x, self.y + other.y)
 
 class Segment:
@@ -43,7 +43,7 @@ class Segment:
     return [(self.start.x, self.start.y), (self.end.x, self.end.y)]
 
 
-def plotPath(title: str, polarCoords: List[Tuple[float, float]]) -> None:
+def plotPath(title: str, polarCoords: List[PolarCoord]) -> None:
   import matplotlib.pyplot as plt
   import matplotlib.collections as mc
   
@@ -54,8 +54,8 @@ def plotPath(title: str, polarCoords: List[Tuple[float, float]]) -> None:
     SAFE_MARGIN = 0.05
     outerRadius = Config.ShapeConstraints.outerDiam / 2
     outerCircle = plt.Circle((0, 0), outerRadius, color='#ffcdd2')
-    ax.set_xlim((-outerRadius - SAFE_MARGIN*outerRadius, outerRadius + SAFE_MARGIN*outerRadius))
-    ax.set_ylim((-outerRadius - SAFE_MARGIN*outerRadius, outerRadius + SAFE_MARGIN*outerRadius))
+    ax.set_xlim((-outerRadius - SAFE_MARGIN*outerRadius, outerRadius + SAFE_MARGIN * outerRadius))
+    ax.set_ylim((-outerRadius - SAFE_MARGIN*outerRadius, outerRadius + SAFE_MARGIN * outerRadius))
     ax.add_patch(outerCircle)
     
     innerRadius = Config.ShapeConstraints.innerDiam / 2
@@ -63,19 +63,9 @@ def plotPath(title: str, polarCoords: List[Tuple[float, float]]) -> None:
     ax.add_patch(innerCircle)
   
   def plotAntennaPath():
-    FIRST_POINT_CART = Point(- Config.ShapeConstraints.outerDiam / 2, 0)
-    segments: List[Segment] = [
-      Segment(
-        FIRST_POINT_CART,
-        FIRST_POINT_CART + polarToCart(polarCoords[0])
-    )]
-
-    for i in range(1, len(polarCoords) - 1):
-      segments.append(
-        Segment(
-          segments[i-1].end, segments[i-1].end + polarToCart(polarCoords[i]))
-      )
-    
+    FIRST_POINT = Point(- Config.ShapeConstraints.outerDiam / 2, 0)
+    rodCoords = polarToRod(polarCoords)
+    segments = rodToPolyChain(FIRST_POINT, rodCoords)
     lines = [line.toList() for line in segments]
     lineCollection = mc.LineCollection(lines, linewidths=3, color="#4caf50")
     ax.add_collection(lineCollection)
@@ -85,6 +75,29 @@ def plotPath(title: str, polarCoords: List[Tuple[float, float]]) -> None:
 
   plt.show()
 
+def polarToRod(polarCoords: List[PolarCoord]) -> List[PolarCoord]:
+  rodCoords = [polarCoords[0]]
+
+  for i in range(1, len(polarCoords)):
+    rodCoords.append(
+      PolarCoord(
+        rodCoords[i-1].angle + polarCoords[i].angle,
+        polarCoords[i].distance
+    ))
+  
+  return rodCoords
+
+def rodToPolyChain(startPoint: Point, rodCoords: List[PolarCoord]) -> List[Segment]:
+  segments = []
+
+  p1 = startPoint
+  for rc in rodCoords:
+    p2 = p1 + polarToCart(rc)
+    segments.append(Segment(p1, p2))
+    p1 = p2
+  
+  return segments
+
 def polarToCart(polarCoord: PolarCoord) -> Point:
   return Point(
     np.cos(polarCoord.angle) * polarCoord.distance,
@@ -93,13 +106,10 @@ def polarToCart(polarCoord: PolarCoord) -> Point:
 
 def isSelfIntersectingPath(polarCoords: List[PolarCoord]) -> bool:
   # See Bentley-Ottmann for a generic approach
-  segmentList = []
-
-  p1 = Point(0, 0)
-  for pc in polarCoords:
-    p2 = p1 + polarToCart(pc)
-    segmentList.append(Segment(p1, p2))
-    p1 = p2
+  segmentList = rodToPolyChain(
+    Point(0, 0),
+    polarToRod(polarCoords)
+  )
   
   for i in range(len(segmentList)):
     for j in range(i+1, len(segmentList)):
@@ -115,9 +125,15 @@ def areIntersectingSegments(segment1: Segment, segment2: Segment) -> bool:
   )
 
 def areIntersectingIntervals(interval1: Tuple[float, float], interval2: Tuple[float, float]) -> bool:
+  a1 = min(interval1[0], interval1[1])
+  a2 = max(interval1[0], interval1[1])
+
+  b1 = min(interval2[0], interval2[1])
+  b2 = max(interval2[0], interval2[1])
+
   return (
-    interval2[0] <= interval1[1] <= interval2[1] or
-    interval2[0] <= interval1[0] <= interval2[1] or
-    interval1[0] <= interval2[1] <= interval1[1] or
-    interval1[0] <= interval2[0] <= interval1[1]
+    a1 < b1 < a2 or
+    a1 < b2 < a2 or
+    b1 < a1 < b2 or
+    b1 < a2 < b2
   )
