@@ -17,6 +17,7 @@ def main(doPlot: bool):
       import matplotlib.pyplot as plt
       plotPath(f"Epoch: {epoch}", sorted(generation)[0].getPolarCoords())  # Plot only best performing individual
 
+
 if __name__ == "__main__":
   parser = argparse.ArgumentParser(
     description = "Planar evolved antenna proof-of-concept"
