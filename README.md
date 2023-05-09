@@ -19,6 +19,20 @@ A single cut-point crossover is done a the moment. Crossover recombines genes fr
 
 Mutation is a draw without replacement of _mutation\_rate_ * _population\_size_ individuals to which a random mutation (for both angles and lengths) is applied.
 
+## Usage
+Dependencies installation:
+```bash
+python3 -m pip install -r requirements.txt
+```
+
+Proof-of-concept:
+```bash
+cd src
+python3 poc.py [-p]
+```
+
+Where `-p` is the short option for `--plot`.
+
 ## Credits
  - Enlightening _Advanced antenna design for a NASA satellite mission_ paper ([https://digitalcommons.usu.edu/cgi/viewcontent.cgi?article=1426&context=smallsat](https://digitalcommons.usu.edu/cgi/viewcontent.cgi?article=1426&context=smallsat))
  - _Learning and evolution of artificial systems_ lectures (UniMoRe)
