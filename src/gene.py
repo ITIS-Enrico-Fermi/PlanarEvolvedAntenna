@@ -1,6 +1,6 @@
 import numpy as np
 from typing import List, Tuple
-from utils import PolarCoord
+from utils import PolarCoord, isSelfIntersectingPath
 from config import Config
 
 
@@ -61,7 +61,10 @@ class Gene:
     """Returns true if the path is not slef-intersecting
     and doesn't come across the inner hole
     """
-    return True
+    return not (
+      isSelfIntersectingPath(self.encoding) and
+      ...
+    )
   
   def fitness(self) -> np.float16:
     return 1

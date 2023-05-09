@@ -39,6 +39,7 @@ class Segment:
   def toList(self) -> List[Tuple[float, float]]:
     return [(self.start.x, self.start.y), (self.end.x, self.end.y)]
 
+
 def plotPath(title: str, polarCoords: List[Tuple[float, float]]) -> None:
   import matplotlib.pyplot as plt
   import matplotlib.collections as mc
@@ -92,4 +93,22 @@ def polarToCart(startPoint: Point, polarCoord: PolarCoord) -> Point:
   return Point(
     startPoint.x + np.cos(polarCoord.angle) * polarCoord.distance,
     startPoint.y + np.sin(polarCoord.angle) * polarCoord.distance
+  )
+
+def isSelfIntersectingPath(polarCoords: List[PolarCoord]):
+  # See Bentley-Ottmann for a generic approach
+  ...
+
+def areIntersectingSegments(segment1: Segment, segment2: Segment):
+  return (
+    areIntersectingIntervals(segment1.x, segment2.x) and
+    areIntersectingIntervals(segment1.y, segment2.y)
+  )
+
+def areIntersectingIntervals(interval1: Tuple[float, float], interval2: Tuple[float, float]):
+  return (
+    interval2[0] <= interval1[1] <= interval2[1] or
+    interval2[0] <= interval1[0] <= interval2[1] or
+    interval1[0] <= interval2[1] <= interval1[1] or
+    interval1[0] <= interval2[0] <= interval1[1]
   )
