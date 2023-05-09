@@ -33,8 +33,8 @@ class Config:
 
     Config.GeneticAlgoTuning.populationSize = d["genetic_algo_tuning"]["population_size"]
     Config.GeneticAlgoTuning.iterationsNumber = d["genetic_algo_tuning"]["iterations_number"]
-    Config.GeneticAlgoTuning.cutPoints = d["genetic_algo_tuning"]["mutation_rate"]
-    Config.GeneticAlgoTuning.mutationRate = d["genetic_algo_tuning"]["cut_points"]
+    Config.GeneticAlgoTuning.cutPoints = d["genetic_algo_tuning"]["cut_points"]
+    Config.GeneticAlgoTuning.mutationRate = d["genetic_algo_tuning"]["mutation_rate"]
     Config.GeneticAlgoTuning.turnoverRate = d["genetic_algo_tuning"]["turnover_rate"]
 
     Config.GeneEncoding.segmentsNumber = d["gene_encoding"]["segments_number"]

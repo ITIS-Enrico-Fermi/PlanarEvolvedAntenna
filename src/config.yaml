@@ -17,5 +17,5 @@ gene_encoding:
   spline_interpolation: false
   max_angle: 1.57079632679  # rad
   max_segment_length: 6.6  # mm
-  min_segment_length: 1  # mm
+  min_segment_length: 3  # mm
 ...

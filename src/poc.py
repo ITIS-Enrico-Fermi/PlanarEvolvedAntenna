@@ -1,15 +1,16 @@
 import argparse
-from secrets import choice
 import numpy as np
 from utils import PolarCoord, plotPath
 from math import ceil, floor
-from random import randrange, choices
+from random import randrange, sample
 from config import Config
 from typing import List, Tuple
 
 CONFIG_FILENAME = "config.yaml"
 
 class Gene:
+  serial: int = 0
+
   def __init__(self, encodedGene: List[PolarCoord] = None):
     if (encodedGene is not None):
       self.encoding = encodedGene
@@ -25,11 +26,14 @@ class Gene:
 
     self.setEncoding(revolutionAngles, segmentLengths)
 
+    self.serial = Gene.serial
+    Gene.serial += 1
+
   def __lt__(self, other) -> bool:
     return self.fitness() < other.fitness()
   
   def __repr__(self) -> str:
-    res = "<"
+    res = f"{self.serial} <"
     lastItemIdx = len(self.encoding) - 1
     for i in range(lastItemIdx):
       res += f"{self.encoding[i].angle} deg - {self.encoding[i].distance} mm - "
@@ -107,36 +111,33 @@ class Population:
       self.population.append(newGene)
     
   def mutate(self):
-    print(f"Before: {self.population}")
-
-    toMutateSize = int(Config.GeneticAlgoTuning.mutationRate * len(self.population))
-    genesToMutate = choices(self.population, k = toMutateSize)
+    toMutateSize = ceil(Config.GeneticAlgoTuning.mutationRate * len(self.population))
+    genesToMutate = sample(self.population, k = toMutateSize)
 
     for gene in genesToMutate:
-      for polarCoord in gene:
-        mutationAngles = (np.random.rand(Config.GeneEncoding.segmentsNumber) - 0.5) * Config.GeneEncoding.maxAngle
-        mutationLengths = np.random.uniform(
-          low = - (Config.GeneEncoding.minSegmentLen + Config.GeneEncoding.maxSegmentLen) / 2,
-          high = (Config.GeneEncoding.minSegmentLen + Config.GeneEncoding.maxSegmentLen) / 2,
-          size = Config.GeneEncoding.segmentsNumber
-        )
+      mutationAngles = (np.random.rand(Config.GeneEncoding.segmentsNumber) - 0.5) \
+        * Config.GeneEncoding.maxAngle
 
-        newAngles = np.clip(
-          gene.getAngleArray() + mutationAngles,
-          Config.GeneEncoding.minSegmentLen,
-          Config.GeneEncoding.maxSegmentLen
-        )
+      mutationLengths = np.random.uniform(
+        low = - (Config.GeneEncoding.minSegmentLen + Config.GeneEncoding.maxSegmentLen) / 2,
+        high = (Config.GeneEncoding.minSegmentLen + Config.GeneEncoding.maxSegmentLen) / 2,
+        size = Config.GeneEncoding.segmentsNumber
+      )
 
-        newLengths = np.clip(
-          gene.getLengthArray() + mutationLengths,
-          - Config.GeneEncoding.maxAngle / 2,
-          + Config.GeneEncoding.maxAngle / 2
-        )
+      newAngles = np.clip(
+        gene.getAngleArray() + mutationAngles,
+        - Config.GeneEncoding.maxAngle / 2,
+        + Config.GeneEncoding.maxAngle / 2
+      )
 
-        gene.setEncoding(newAngles, newLengths)
+      newLengths = np.clip(
+        gene.getLengthArray() + mutationLengths,
+        Config.GeneEncoding.minSegmentLen,
+        Config.GeneEncoding.maxSegmentLen
+      )
+
+      gene.setEncoding(newAngles, newLengths)
       
-    print(f"After: {self.population}")
-
 
 def main(doPlot: bool):
   with open(CONFIG_FILENAME, "r") as f:
