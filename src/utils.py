@@ -14,6 +14,12 @@ class PolarCoord:
   def __repr__(self):
     return f"[Angle: {self.angle}, Dist: {self.distance}]"
   
+  def __getitem__(self, idx) -> float:
+    if (idx < 0 or idx > 1):
+      raise IndexError("Out of range")
+    
+    return self.angle if idx == 0 else self.distance
+  
 class Point:
   def __init__(self, x: float, y: float):
     self.x = x

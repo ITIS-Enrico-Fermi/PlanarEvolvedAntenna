@@ -6,7 +6,7 @@ shape_constraints:  # the unit of measure is mm
   target_frequency: 868.0e+6
 
 genetic_algo_tuning:
-  population_size: 100
+  population_size: 5
   turnover_rate: 0.5
   iterations_number: 3
   mutation_rate: 0.3

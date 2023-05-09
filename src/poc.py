@@ -1,8 +1,9 @@
 import argparse
+from secrets import choice
 import numpy as np
 from utils import PolarCoord, plotPath
 from math import ceil, floor
-from random import randrange
+from random import randrange, choices
 from config import Config
 from typing import List, Tuple
 
@@ -22,8 +23,7 @@ class Gene:
       high = Config.GeneEncoding.maxSegmentLen,
       size = Config.GeneEncoding.segmentsNumber)
 
-    self.encoding = list(zip(revolutionAngles, segmentLengths))
-    self.encoding = [PolarCoord(a, l) for (a, l) in self.encoding]
+    self.setEncoding(revolutionAngles, segmentLengths)
 
   def __lt__(self, other) -> bool:
     return self.fitness() < other.fitness()
@@ -40,8 +40,22 @@ class Gene:
   def __getitem__(self, itemIdx):
     return self.encoding[itemIdx]
   
-  def getPolarCoords(self):
+  def getPolarCoords(self) -> List[PolarCoord]:
     return self.encoding
+  
+  def getAngleArray(self) -> np.ndarray:
+    return np.asarray(
+      list(zip(*self.encoding))[0]
+    )
+
+  def getLengthArray(self) -> np.ndarray:
+    return np.asarray(
+      list(zip(*self.encoding))[1]
+    )
+  
+  def setEncoding(self, angles: List[float], lengths: List[float]) -> None:
+    self.encoding = list(zip(angles, lengths))
+    self.encoding = [PolarCoord(a, l) for (a, l) in self.encoding]
 
   def isValid(self) -> bool:
     """Returns true if the path is not slef-intersecting
@@ -93,7 +107,35 @@ class Population:
       self.population.append(newGene)
     
   def mutate(self):
-    ...
+    print(f"Before: {self.population}")
+
+    toMutateSize = int(Config.GeneticAlgoTuning.mutationRate * len(self.population))
+    genesToMutate = choices(self.population, k = toMutateSize)
+
+    for gene in genesToMutate:
+      for polarCoord in gene:
+        mutationAngles = (np.random.rand(Config.GeneEncoding.segmentsNumber) - 0.5) * Config.GeneEncoding.maxAngle
+        mutationLengths = np.random.uniform(
+          low = - (Config.GeneEncoding.minSegmentLen + Config.GeneEncoding.maxSegmentLen) / 2,
+          high = (Config.GeneEncoding.minSegmentLen + Config.GeneEncoding.maxSegmentLen) / 2,
+          size = Config.GeneEncoding.segmentsNumber
+        )
+
+        newAngles = np.clip(
+          gene.getAngleArray() + mutationAngles,
+          Config.GeneEncoding.minSegmentLen,
+          Config.GeneEncoding.maxSegmentLen
+        )
+
+        newLengths = np.clip(
+          gene.getLengthArray() + mutationLengths,
+          - Config.GeneEncoding.maxAngle / 2,
+          + Config.GeneEncoding.maxAngle / 2
+        )
+
+        gene.setEncoding(newAngles, newLengths)
+      
+    print(f"After: {self.population}")
 
 
 def main(doPlot: bool):
