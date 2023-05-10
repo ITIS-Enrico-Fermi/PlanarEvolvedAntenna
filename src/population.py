@@ -11,7 +11,7 @@ class Population:
     self.population = [Gene() for _ in range(Config.GeneticAlgoTuning.populationSize)]
     self.generationNumber = 0
 
-  def nextGeneration(self) -> List[Gene]:
+  def generations(self) -> List[Gene]:
     for _ in range(Config.GeneticAlgoTuning.iterationsNumber):
       self.crossover()
       self.mutate()
