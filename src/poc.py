@@ -15,8 +15,6 @@ def simulationStep(pop: Population, doPlot: bool, *_) -> None:
   if doPlot:
     plotPath(f"Epoch: {epoch}", generation[0].getCartesianCoords())  # Plot only best performing individual
 
-  return
-
 
 def buildSimulation(doPlot: bool, *_) -> Callable[[Population, bool], None]:
   pop = Population()
