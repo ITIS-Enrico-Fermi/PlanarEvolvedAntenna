@@ -3,11 +3,11 @@ cycler==0.11.0
 fonttools==4.39.3
 kiwisolver==1.4.4
 matplotlib==3.7.1
+necpp==1.7.3.5
 numpy==1.24.3
 packaging==23.1
 pandas==1.5.3
 Pillow==9.5.0
-PyNEC==1.7.3.4
 pyparsing==3.0.9
 python-dateutil==2.8.2
 pytz==2023.3
