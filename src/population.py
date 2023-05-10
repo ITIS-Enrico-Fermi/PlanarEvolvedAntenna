@@ -13,9 +13,9 @@ class Population:
 
   def nextGeneration(self) -> List[Gene]:
     for _ in range(Config.GeneticAlgoTuning.iterationsNumber):
-      self.fight()
       self.crossover()
       self.mutate()
+      self.fight()
       self.generationNumber += 1
       yield self.population, self.generationNumber
     
