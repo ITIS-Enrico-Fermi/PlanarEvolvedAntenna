@@ -15,7 +15,7 @@ def main(doPlot: bool):
 
     if doPlot:
       import matplotlib.pyplot as plt
-      plotPath(f"Epoch: {epoch}", sorted(generation)[0].getCartesianCoords())  # Plot only best performing individual
+      plotPath(f"Epoch: {epoch}", generation[0].getCartesianCoords())  # Plot only best performing individual
 
 
 if __name__ == "__main__":
