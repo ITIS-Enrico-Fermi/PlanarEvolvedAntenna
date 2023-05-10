@@ -13,7 +13,7 @@ def simulationStep(pop: Population, doPlot: bool, *_) -> None:
   print(epoch, generation)
 
   if doPlot:
-    plotPath(f"Epoch: {epoch}", generation[0].getCartesianCoords())  # Plot only best performing individual
+    plotPath(f"Epoch: {epoch} - Fitness: {generation[0].fitness()}", generation[0].getCartesianCoords())  # Plot only best performing individual
 
 
 def buildSimulation(doPlot: bool, *_) -> Callable[[Population, bool], None]:
@@ -33,7 +33,7 @@ def main(doPlot: bool):
     import matplotlib.animation as animation
 
     fig = plt.figure()
-    anim = animation.FuncAnimation(fig, simulation, interval=200)
+    anim = animation.FuncAnimation(fig, simulation, interval=10)
     plt.show()
 
   else:

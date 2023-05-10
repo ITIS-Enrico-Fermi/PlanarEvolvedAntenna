@@ -1,9 +1,10 @@
 import numpy as np
 from typing import List, Tuple
-from _PyNEC import *
+from necpp import *
 from config import Config
 from utils.geometry import *
 from rf.antenna_util import *
+from rf.context_clean import *
 
 
 class Gene:
@@ -89,4 +90,63 @@ class Gene:
   def fitness(self) -> np.float16:
     freqHz = Config.ShapeConstraints.targetFreq
     wavelength = 299792e3 / freqHz
-    return 1    
+    context = nec_create()
+    substrateThickness = 2
+
+    for segment in self.getCartesianCoords():
+      assert nec_wire(
+        context,
+        self.serial,  # tag ID
+        3,  # Segment count
+        segment.start.x / 1000,  # Start point x in m
+        segment.start.y / 1000,  # Start point y in m
+        substrateThickness,  # Start point z in m
+        segment.end.x / 1000,  # Start point x in m
+        segment.end.y / 1000,  # Start point y in m
+        substrateThickness, # Start point z in m
+        0.00001,  # First segment radius
+        1,  # Uniform length
+        1  # Ratio of adjacent segments
+      ) == 0
+
+    assert nec_geometry_complete(context, 0) == 0  # inner 0 means no ground-plane
+    assert nec_gn_card(context, 1, 0, 0, 0, 0, 0, 0, 0) == 0  # Infinite ground plane
+    
+    assert nec_fr_card(  # Frequency
+      context,
+      0,  # Linear range
+      1,  # One frequency
+      freqHz / 10e6,  # Frequency in MHz
+      0  # Frequency step
+    ) == 0
+
+    assert nec_ex_card(  # Excitatoin
+      context,
+      0,  # Voltage source excitation
+      0,
+      1,
+      0,
+      1.0, 0, 0, 0, 0, 0  # Tmp
+    ) == 0
+
+    # assert nec_excitation_voltage(context, 0, 0, 5, 0) == 0  # Alternative to previous line
+    assert nec_rp_card(  # Radiation Pattern
+      context,
+      0,  # Normal calc mode
+      90,  # Number of theta angles
+      1,  # Number of phi angles
+      0,  # Major-minor axes
+      5,  # Total gain normalized
+      0,  # Power gain
+      0,  # No averaging
+      0,  # Theta zero
+      90,  # Phi zero
+      1,  # Theta increment in deg
+      0,  # Phi increment in deg
+      0,  # Radial distance from origin
+      1,  # Normalization factor
+    ) == 0
+
+    return nec_gain(context, 0, 0, 0)
+
+    
