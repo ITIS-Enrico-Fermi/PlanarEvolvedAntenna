@@ -1,8 +1,8 @@
+import matplotlib.pyplot as plt
+import matplotlib.collections as mc
 from typing import List, Tuple
 from config import Config
 from utils.geometry import *
-import matplotlib.pyplot as plt
-import matplotlib.collections as mc
 
 def plotPath(title: str, polychain: List[Segment]) -> None:
   ax = plt.gca()
