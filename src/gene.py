@@ -1,8 +1,8 @@
 import numpy as np
+from _PyNEC import *
 from typing import List, Tuple
-from utils import *
+from utils.geometry import *
 from config import Config
-
 
 class Gene:
   serial: int = 0
@@ -48,6 +48,9 @@ class Gene:
   
   def getPolarCoords(self) -> List[PolarCoord]:
     return self.rodEncoding
+
+  def getCartesianCoords(self) -> List[Segment]:
+    return self.polychainEncoding
   
   def getAngleArray(self) -> np.ndarray:
     return np.asarray(

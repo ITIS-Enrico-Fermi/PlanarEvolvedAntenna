@@ -1,5 +1,4 @@
 # Source: https://github.com/tmolteno/python-necpp/blob/master/PyNEC/example/context_clean.py
-
 # Note: explicit zeroes are blanks. All other values should be specified symbolically.
 
 class Range(object):
@@ -10,7 +9,7 @@ class Range(object):
             self.count = count
             self.delta = (stop - start) / count
         else:
-            self.count = (stop_ - start) / delta
+            self.count = (stop - start) / delta
             self.delta = delta
 
 # Setting do_debug to True will dump all the cards generated with context_clean, so you can verify the output more easily in a text editor (and debug that file manually)

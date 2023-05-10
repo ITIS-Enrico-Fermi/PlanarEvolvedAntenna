@@ -1,7 +1,7 @@
 import numpy as np
 from math import ceil, floor
 from random import randrange, sample
-from typing import List, Tuple
+from typing import List
 from config import Config
 from gene import Gene
 

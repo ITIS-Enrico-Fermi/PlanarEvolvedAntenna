@@ -1,5 +1,5 @@
 import argparse
-from utils import plotPath
+from utils.amenities import plotPath
 from config import Config
 from population import Population
 
@@ -15,7 +15,7 @@ def main(doPlot: bool):
 
     if doPlot:
       import matplotlib.pyplot as plt
-      plotPath(f"Epoch: {epoch}", sorted(generation)[0].getPolarCoords())  # Plot only best performing individual
+      plotPath(f"Epoch: {epoch}", sorted(generation)[0].getCartesianCoords())  # Plot only best performing individual
 
 
 if __name__ == "__main__":
