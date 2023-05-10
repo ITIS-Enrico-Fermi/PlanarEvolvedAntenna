@@ -1,3 +1,4 @@
+import logging
 import numpy as np
 from math import ceil, floor
 from random import randrange, sample
@@ -24,10 +25,15 @@ class Population:
     """This step filters out non-valid individuals and
     keeps only some of them according to the turnover rate
     """
-    self.population = filter(
+    oldGenerationSize = len(self.population)
+
+    self.population = list(
+      filter(
       lambda x: x.isValid(),
       self.population
-    )
+    ))
+
+    logging.warning(f"Killed {oldGenerationSize - len(self.population)} ({(oldGenerationSize - len(self.population)) / oldGenerationSize * 100:.1f}%) genes")
 
     survivedGenesNumber = ceil(Config.GeneticAlgoTuning.turnoverRate * Config.GeneticAlgoTuning.populationSize)
     self.population = sorted(self.population, reverse=True)[ : survivedGenesNumber]

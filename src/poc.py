@@ -1,4 +1,5 @@
 import argparse
+import logging
 from utils.amenities import plotPath
 from config import Config
 from population import Population
@@ -9,8 +10,10 @@ CONFIG_FILENAME = "config.yaml"
 
 def simulationStep(pop: Population, doPlot: bool, *_) -> None:
   generation, epoch = next(pop.generations())
-
-  print(epoch, generation)
+  
+  logging.info(f"Epoch: {epoch}")
+  logging.debug(generation)
+  logging.info(f"Best gene (fitness={generation[0].fitness():.2f}):\n{generation[0]}")
 
   if doPlot:
     plotPath(f"Epoch: {epoch} - Fitness: {generation[0].fitness()}", generation[0].getCartesianCoords())  # Plot only best performing individual
@@ -23,6 +26,12 @@ def buildSimulation(doPlot: bool, *_) -> Callable[[Population, bool], None]:
 
 
 def main(doPlot: bool):
+  logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s: %(message)s",
+    datefmt="%H:%M:%S"
+  )
+
   with open(CONFIG_FILENAME, "r") as f:
     Config.loadYaml(f)
 

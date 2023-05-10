@@ -22,7 +22,6 @@ def plotPath(title: str, polychain: List[Segment]) -> None:
   
   def plotAntennaPath():
     lines = [line.toList() for line in polychain]
-    print(polychain)
     lineCollection = mc.LineCollection(lines, linewidths=3, color="#4caf50")
     ax.add_collection(lineCollection)
 

@@ -9,10 +9,12 @@ from rf.context_clean import *
 
 
 class Gene:
-  serial: int = 0
+  globalSerial: int = 0
 
   def __init__(self, rodEncodedGene: List[PolarCoord] = None):
     self.FIRST_POINT = Point(- Config.ShapeConstraints.outerDiam / 2, 0)
+    self.serial = Gene.globalSerial
+    Gene.globalSerial += 1
 
     if (rodEncodedGene is not None):
       self.rodEncoding = rodEncodedGene
@@ -32,18 +34,18 @@ class Gene:
 
     self.setEncoding(revolutionAngles, segmentLengths)
 
-    self.serial = Gene.serial
-    Gene.serial += 1
 
   def __lt__(self, other) -> bool:
     return self.fitness() < other.fitness()
   
   def __repr__(self) -> str:
-    res = f"{self.serial} <"
+    res = f"GeneID: {self.serial} <"
+
     lastItemIdx = len(self.rodEncoding) - 1
+
     for i in range(lastItemIdx):
-      res += f"{self.rodEncoding[i].angle} deg - {self.rodEncoding[i].distance} mm - "
-    res += f"{self.rodEncoding[lastItemIdx].angle} deg - {self.rodEncoding[lastItemIdx].distance} mm>"
+      res += f"{self.rodEncoding[i].angle:.1f} deg - {self.rodEncoding[i].distance:.1f} mm - "
+    res += f"{self.rodEncoding[lastItemIdx].angle:.1f} deg - {self.rodEncoding[lastItemIdx].distance:.1f} mm>"
 
     return res
   
@@ -97,7 +99,7 @@ class Gene:
     for segment in self.getCartesianCoords():
       assert nec_wire(
         context,
-        self.serial,  # tag ID
+        self.globalSerial,  # tag ID
         1,  # Segment count
         segment.start.x / 1000,  # Start point x in m
         segment.start.y / 1000,  # Start point y in m
