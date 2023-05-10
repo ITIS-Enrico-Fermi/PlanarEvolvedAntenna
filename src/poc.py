@@ -32,8 +32,6 @@ def main(doPlot: bool):
     import matplotlib.pyplot as plt
     import matplotlib.animation as animation
 
-    simulation_callback = partial(simulation, doPlot)
-
     fig = plt.figure()
     anim = animation.FuncAnimation(fig, simulation, interval=200)
     plt.show()
