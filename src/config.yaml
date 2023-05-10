@@ -13,9 +13,9 @@ genetic_algo_tuning:
   cut_points: 1
 
 gene_encoding:
-  segments_number: 15
+  segments_number: 25
   spline_interpolation: false
   max_angle: 3.14159265359  # rad
-  max_segment_length: 20  # mm
+  max_segment_length: 10  # mm
   min_segment_length: 1  # mm
 ...
