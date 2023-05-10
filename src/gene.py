@@ -1,8 +1,10 @@
 import numpy as np
-from _PyNEC import *
 from typing import List, Tuple
-from utils.geometry import *
+from _PyNEC import *
 from config import Config
+from utils.geometry import *
+from rf.antenna_util import *
+
 
 class Gene:
   serial: int = 0
@@ -85,4 +87,6 @@ class Gene:
     )
   
   def fitness(self) -> np.float16:
-    return 1
+    freqHz = Config.ShapeConstraints.targetFreq
+    wavelength = 299792e3 / freqHz
+    return 1    

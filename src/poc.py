@@ -14,7 +14,6 @@ def main(doPlot: bool):
     print(epoch, generation)
 
     if doPlot:
-      import matplotlib.pyplot as plt
       plotPath(f"Epoch: {epoch}", generation[0].getCartesianCoords())  # Plot only best performing individual
 
 
