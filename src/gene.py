@@ -1,3 +1,4 @@
+import wave
 import numpy as np
 from typing import List, Tuple
 from necpp import *
@@ -88,23 +89,23 @@ class Gene:
     )
   
   def fitness(self) -> np.float16:
+    SUBSTRATE_THICKNESS = 2
     freqHz = Config.ShapeConstraints.targetFreq
     wavelength = 299792e3 / freqHz
     context = nec_create()
-    substrateThickness = 2
 
     for segment in self.getCartesianCoords():
       assert nec_wire(
         context,
         self.serial,  # tag ID
-        3,  # Segment count
+        1,  # Segment count
         segment.start.x / 1000,  # Start point x in m
         segment.start.y / 1000,  # Start point y in m
-        substrateThickness,  # Start point z in m
+        SUBSTRATE_THICKNESS,  # Start point z in m
         segment.end.x / 1000,  # Start point x in m
         segment.end.y / 1000,  # Start point y in m
-        substrateThickness, # Start point z in m
-        0.00001,  # First segment radius
+        SUBSTRATE_THICKNESS, # Start point z in m
+        0.0001,  # First segment radius
         1,  # Uniform length
         1  # Ratio of adjacent segments
       ) == 0
@@ -116,7 +117,7 @@ class Gene:
       context,
       0,  # Linear range
       1,  # One frequency
-      freqHz / 10e6,  # Frequency in MHz
+      freqHz / 1e6,  # Frequency in MHz
       0  # Frequency step
     ) == 0
 
