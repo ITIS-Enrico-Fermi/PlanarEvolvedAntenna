@@ -1,12 +1,11 @@
 from typing import List, Tuple
 from config import Config
 from utils.geometry import *
+import matplotlib.pyplot as plt
+import matplotlib.collections as mc
 
 def plotPath(title: str, polychain: List[Segment]) -> None:
-  import matplotlib.pyplot as plt
-  import matplotlib.collections as mc
-  
-  fig, ax = plt.subplots()
+  ax = plt.gca()
   ax.axis("equal")
 
   def plotCansatBottomProfile():
@@ -27,8 +26,8 @@ def plotPath(title: str, polychain: List[Segment]) -> None:
     lineCollection = mc.LineCollection(lines, linewidths=3, color="#4caf50")
     ax.add_collection(lineCollection)
 
+  plt.cla()
   plotCansatBottomProfile()
   plotAntennaPath()
 
   plt.title(title)
-  plt.show()
