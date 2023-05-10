@@ -30,7 +30,7 @@ class Population:
     )
 
     survivedGenesNumber = ceil(Config.GeneticAlgoTuning.turnoverRate * Config.GeneticAlgoTuning.populationSize)
-    self.population = sorted(self.population)[ : survivedGenesNumber]
+    self.population = sorted(self.population, reverse=True)[ : survivedGenesNumber]
   
   def crossover(self):
     newGenerationSize = floor((1.0 - Config.GeneticAlgoTuning.turnoverRate) * Config.GeneticAlgoTuning.populationSize)
