@@ -6,16 +6,16 @@ shape_constraints:
   target_frequency: 868.0e+6  # Hz
 
 genetic_algo_tuning:
-  population_size: 100
+  population_size: 300
   turnover_rate: 0.5  # rate of new individuals generated from crossover
   iterations_number: 1000
   mutation_rate: 0.3  # rate of individuals that will be mutated at each iteration
   cut_points: 1
 
 gene_encoding:
-  segments_number: 10
+  segments_number: 15
   spline_interpolation: false
-  max_angle: 1.57079632679  # rad
-  max_segment_length: 6.6  # mm
-  min_segment_length: 3  # mm
+  max_angle: 3.14159265359  # rad
+  max_segment_length: 20  # mm
+  min_segment_length: 1  # mm
 ...
