@@ -1,15 +1,21 @@
 import numpy as np
 from typing import List, Tuple
-from utils import PolarCoord, isSelfIntersectingPath
+from utils import *
 from config import Config
 
 
 class Gene:
   serial: int = 0
 
-  def __init__(self, encodedGene: List[PolarCoord] = None):
-    if (encodedGene is not None):
-      self.encoding = encodedGene
+  def __init__(self, rodEncodedGene: List[PolarCoord] = None):
+    self.FIRST_POINT = Point(- Config.ShapeConstraints.outerDiam / 2, 0)
+
+    if (rodEncodedGene is not None):
+      self.rodEncoding = rodEncodedGene
+      self.polychainEncoding = polarToPolychain(
+        self.FIRST_POINT,
+        rodToPolar(self.rodEncoding)
+      )
       return
 
     revolutionAngles = (np.random.rand(Config.GeneEncoding.segmentsNumber) - 0.5) * \
@@ -30,42 +36,50 @@ class Gene:
   
   def __repr__(self) -> str:
     res = f"{self.serial} <"
-    lastItemIdx = len(self.encoding) - 1
+    lastItemIdx = len(self.rodEncoding) - 1
     for i in range(lastItemIdx):
-      res += f"{self.encoding[i].angle} deg - {self.encoding[i].distance} mm - "
-    res += f"{self.encoding[lastItemIdx].angle} deg - {self.encoding[lastItemIdx].distance} mm>"
+      res += f"{self.rodEncoding[i].angle} deg - {self.rodEncoding[i].distance} mm - "
+    res += f"{self.rodEncoding[lastItemIdx].angle} deg - {self.rodEncoding[lastItemIdx].distance} mm>"
 
     return res
   
   def __getitem__(self, itemIdx):
-    return self.encoding[itemIdx]
+    return self.rodEncoding[itemIdx]
   
   def getPolarCoords(self) -> List[PolarCoord]:
-    return self.encoding
+    return self.rodEncoding
   
   def getAngleArray(self) -> np.ndarray:
     return np.asarray(
-      list(zip(*self.encoding))[0]
+      list(zip(*self.rodEncoding))[0]
     )
 
   def getLengthArray(self) -> np.ndarray:
     return np.asarray(
-      list(zip(*self.encoding))[1]
+      list(zip(*self.rodEncoding))[1]
     )
   
   def setEncoding(self, angles: List[float], lengths: List[float]) -> None:
-    self.encoding = list(zip(angles, lengths))
-    self.encoding = [PolarCoord(a, l) for (a, l) in self.encoding]
+    self.rodEncoding = list(zip(angles, lengths))
+    self.rodEncoding = [PolarCoord(a, l) for (a, l) in self.rodEncoding]
+
+    self.polychainEncoding = polarToPolychain(
+        self.FIRST_POINT,
+        rodToPolar(self.rodEncoding)
+      )
 
   def isValid(self) -> bool:
     """Returns true if the path is not slef-intersecting
     and doesn't come across the inner hole
     """
-    # return not (
-    #   isSelfIntersectingPath(self.encoding) and
-    #   ...
-    # )
-    return True
+    OUTER_RADIUS = Config.ShapeConstraints.outerDiam / 2
+    INNER_RADIUS = Config.ShapeConstraints.innerDiam / 2
+    
+    return (
+      not isSelfIntersectingPath(self.polychainEncoding) and
+      not doesPathIntersectCircle(self.polychainEncoding, Point(Config.ShapeConstraints.centerShift, 0), INNER_RADIUS) and
+      isPathInCircle(self.polychainEncoding, Point(0, 0), OUTER_RADIUS)
+    )
   
   def fitness(self) -> np.float16:
     return 1

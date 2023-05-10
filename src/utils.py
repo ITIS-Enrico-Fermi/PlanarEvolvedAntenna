@@ -43,7 +43,7 @@ class Segment:
     return [(self.start.x, self.start.y), (self.end.x, self.end.y)]
 
 
-def plotPath(title: str, polarCoords: List[PolarCoord]) -> None:
+def plotPath(title: str, polychain: List[Segment]) -> None:
   import matplotlib.pyplot as plt
   import matplotlib.collections as mc
   
@@ -63,35 +63,33 @@ def plotPath(title: str, polarCoords: List[PolarCoord]) -> None:
     ax.add_patch(innerCircle)
   
   def plotAntennaPath():
-    FIRST_POINT = Point(- Config.ShapeConstraints.outerDiam / 2, 0)
-    rodCoords = polarToRod(polarCoords)
-    segments = rodToPolyChain(FIRST_POINT, rodCoords)
-    lines = [line.toList() for line in segments]
+    lines = [line.toList() for line in polychain]
     lineCollection = mc.LineCollection(lines, linewidths=3, color="#4caf50")
     ax.add_collection(lineCollection)
 
   plotCansatBottomProfile()
   plotAntennaPath()
 
+  plt.title(title)
   plt.show()
 
-def polarToRod(polarCoords: List[PolarCoord]) -> List[PolarCoord]:
-  rodCoords = [polarCoords[0]]
+def rodToPolar(rodCoords: List[PolarCoord]) -> List[PolarCoord]:
+  polarCoords = [rodCoords[0]]
 
-  for i in range(1, len(polarCoords)):
-    rodCoords.append(
+  for i in range(1, len(rodCoords)):
+    polarCoords.append(
       PolarCoord(
-        rodCoords[i-1].angle + polarCoords[i].angle,
-        polarCoords[i].distance
+        polarCoords[i-1].angle + rodCoords[i].angle,
+        rodCoords[i].distance
     ))
   
-  return rodCoords
+  return polarCoords
 
-def rodToPolyChain(startPoint: Point, rodCoords: List[PolarCoord]) -> List[Segment]:
+def polarToPolychain(startPoint: Point, polarCoords: List[PolarCoord]) -> List[Segment]:
   segments = []
 
   p1 = startPoint
-  for rc in rodCoords:
+  for rc in polarCoords:
     p2 = p1 + polarToCart(rc)
     segments.append(Segment(p1, p2))
     p1 = p2
@@ -104,16 +102,11 @@ def polarToCart(polarCoord: PolarCoord) -> Point:
     np.sin(polarCoord.angle) * polarCoord.distance
   )
 
-def isSelfIntersectingPath(polarCoords: List[PolarCoord]) -> bool:
+def isSelfIntersectingPath(polychain: List[Segment]) -> bool:
   # See Bentley-Ottmann for a generic approach
-  segmentList = rodToPolyChain(
-    Point(0, 0),
-    polarToRod(polarCoords)
-  )
-  
-  for i in range(len(segmentList)):
-    for j in range(i+1, len(segmentList)):
-      if areIntersectingSegments(segmentList[i], segmentList[j]):
+  for i in range(len(polychain)):
+    for j in range(i+1, len(polychain)):
+      if areIntersectingSegments(polychain[i], polychain[j]):
         return True
   
   return False
@@ -137,3 +130,33 @@ def areIntersectingIntervals(interval1: Tuple[float, float], interval2: Tuple[fl
     b1 < a1 < b2 or
     b1 < a2 < b2
   )
+
+def isPathInCircle(polychain: List[Segment], center: Point, radius: float) -> bool:
+  # Most likely to found segments out of the circle at the end of the path
+  radiusSquared = radius**2
+
+  for segment in reversed(polychain):
+    if segment.end.x**2 + segment.end.y**2 > radiusSquared:
+      return False
+  
+  return True
+
+def doesPathIntersectCircle(polychain: List[Segment], center: Point, radius: float) -> bool:
+  # Square approximation
+  mainDiag = Segment(
+    Point(center.x - radius, center.y - radius),
+    Point(center.x + radius, center.y + radius)
+  )
+
+  secondaryDiag = Segment(
+    Point(center.x + radius, center.y + radius),
+    Point(center.x - radius, center.y - radius)
+  )
+
+
+  for segment in reversed(polychain):
+    if areIntersectingSegments(segment, mainDiag) or \
+      areIntersectingSegments(segment, secondaryDiag):
+      return True
+  
+  return False
