@@ -145,14 +145,31 @@ class Gene:
     assert nec_rp_card(  # Radiation Pattern
       context,
       0,  # Normal calc mode
-      12,  # Number of theta angles
+      7,  # Number of theta angles
       1,  # Number of phi angles
       0,  # Major-minor axes
       5,  # Total gain normalized
       0,  # Power gain
       0,  # Do averaging
       0,  # Theta zero
-      90,  # Phi zero
+      0,  # Phi zero
+      15,  # Theta increment in deg
+      0,  # Phi increment in deg
+      0,  # Radial distance from origin
+      0,  # Normalization factor
+    ) == 0
+
+    assert nec_rp_card(  # Radiation Pattern
+      context,
+      0,  # Normal calc mode
+      6,  # Number of theta angles
+      1,  # Number of phi angles
+      0,  # Major-minor axes
+      5,  # Total gain normalized
+      0,  # Power gain
+      0,  # Do averaging
+      15,  # Theta zero
+      180,  # Phi zero
       15,  # Theta increment in deg
       0,  # Phi increment in deg
       0,  # Radial distance from origin
