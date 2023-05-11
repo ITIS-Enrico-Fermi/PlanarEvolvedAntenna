@@ -1,4 +1,5 @@
-import wave
+import logging
+import math
 import numpy as np
 from typing import List, Tuple
 from necpp import *
@@ -15,6 +16,7 @@ class Gene:
   def __init__(self, rodEncodedGene: List[PolarCoord] = None):
     self.FIRST_POINT = Point(- Config.ShapeConstraints.outerDiam / 2, 0)
     self.fitnessCached = float("-inf")
+    self.ampK = None
     self.serial = Gene.globalSerial
     Gene.globalSerial += 1
 
@@ -94,6 +96,13 @@ class Gene:
       isPathInCircle(self.polychainEncoding, Point(0, 0), OUTER_RADIUS)
     )
   
+  def ampFactor(self, x: float):
+    if self.ampK is None:
+      self.ampK = ampK = math.exp(-0.002 * (x - 400)) - 1
+    
+    logging.debug(f"ampK: {self.ampK}")
+    return self.ampK
+
   def fitness(self) -> np.float16:
     SUBSTRATE_THICKNESS = 2
     freqHz = Config.ShapeConstraints.targetFreq
@@ -107,10 +116,10 @@ class Gene:
         1,  # Segment count
         segment.start.x / 1000,  # Start point x in m
         segment.start.y / 1000,  # Start point y in m
-        SUBSTRATE_THICKNESS,  # Start point z in m
+        SUBSTRATE_THICKNESS / 1000,  # Start point z in m
         segment.end.x / 1000,  # Start point x in m
         segment.end.y / 1000,  # Start point y in m
-        SUBSTRATE_THICKNESS, # Start point z in m
+        SUBSTRATE_THICKNESS / 1000, # Start point z in m
         0.0001,  # First segment radius
         1,  # Uniform length
         1  # Ratio of adjacent segments
@@ -139,21 +148,44 @@ class Gene:
     assert nec_rp_card(  # Radiation Pattern
       context,
       0,  # Normal calc mode
-      12,  # Number of theta angles
+      7,  # Number of theta angles
       1,  # Number of phi angles
       0,  # Major-minor axes
       5,  # Total gain normalized
       0,  # Power gain
       0,  # Do averaging
       0,  # Theta zero
-      90,  # Phi zero
+      0,  # Phi zero
       15,  # Theta increment in deg
       0,  # Phi increment in deg
       0,  # Radial distance from origin
       0,  # Normalization factor
     ) == 0
 
-    self.fitnessCached = nec_gain_mean(context, 0)
+    assert nec_rp_card(  # Radiation Pattern
+      context,
+      0,  # Normal calc mode
+      6,  # Number of theta angles
+      1,  # Number of phi angles
+      0,  # Major-minor axes
+      5,  # Total gain normalized
+      0,  # Power gain
+      0,  # Do averaging
+      15,  # Theta zero
+      180,  # Phi zero
+      15,  # Theta increment in deg
+      0,  # Phi increment in deg
+      0,  # Radial distance from origin
+      0,  # Normalization factor
+    ) == 0
+
+    self.fitnessCached = nec_gain_max(context, 0) + self.ampFactor(nec_gain_sd(context, 0))
+    logging.debug(f"Gain\n"
+                 f"\tmin: {nec_gain_min(context, 0)}\n"
+                 f"\tmax: {nec_gain_max(context, 0)}\n"
+                 f"\tmean: {nec_gain_mean(context, 0)}\n"
+                 f"\tsd: {nec_gain_sd(context, 0)}\n"
+                 )
 
     self.radiationPattern = RadiationPattern.from_nec_context(context)
 
