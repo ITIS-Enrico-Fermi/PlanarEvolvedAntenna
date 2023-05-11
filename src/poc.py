@@ -16,7 +16,7 @@ def simulationStep(pop: Population, doPlot: bool, *_) -> None:
   logging.info(f"Best gene (fitness={generation[0].fitness():.2f}):\n{generation[0]}")
 
   if doPlot:
-    plotPath(f"Epoch: {epoch} - Fitness: {generation[0].fitness()}", generation[0].getCartesianCoords())  # Plot only best performing individual
+    plotPath(f"Epoch: {epoch} - Fitness: {generation[0].fitness():.2f}", generation[0].getCartesianCoords())  # Plot only best performing individual
 
 
 def buildSimulation(doPlot: bool, *_) -> Callable[[Population, bool], None]:

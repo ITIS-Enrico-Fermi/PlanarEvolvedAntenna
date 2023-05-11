@@ -13,6 +13,7 @@ class Gene:
 
   def __init__(self, rodEncodedGene: List[PolarCoord] = None):
     self.FIRST_POINT = Point(- Config.ShapeConstraints.outerDiam / 2, 0)
+    self.fitnessCached = float("-inf")
     self.serial = Gene.globalSerial
     Gene.globalSerial += 1
 
@@ -149,10 +150,10 @@ class Gene:
       0,  # Normalization factor
     ) == 0
 
-    gain = nec_gain_mean(context, 0)
+    self.fitnessCached = nec_gain_mean(context, 0)
 
     nec_delete(context)
 
-    return gain
+    return self.fitnessCached
 
     

@@ -11,12 +11,15 @@ class Population:
   def __init__(self):
     self.population = [Gene() for _ in range(Config.GeneticAlgoTuning.populationSize)]
     self.generationNumber = 0
+    self.king = Gene()
 
   def generations(self) -> List[Gene]:
     for _ in range(Config.GeneticAlgoTuning.iterationsNumber):
       self.crossover()
       self.mutate()
       self.fight()
+      self.king = \
+        self.population[0] if self.population[0].fitnessCached > self.king.fitnessCached else self.king
       self.generationNumber += 1
       yield self.population, self.generationNumber
     
