@@ -1,4 +1,4 @@
-import wave
+import logging
 import numpy as np
 from typing import List, Tuple
 from necpp import *
@@ -104,10 +104,10 @@ class Gene:
         1,  # Segment count
         segment.start.x / 1000,  # Start point x in m
         segment.start.y / 1000,  # Start point y in m
-        SUBSTRATE_THICKNESS,  # Start point z in m
+        SUBSTRATE_THICKNESS / 1000,  # Start point z in m
         segment.end.x / 1000,  # Start point x in m
         segment.end.y / 1000,  # Start point y in m
-        SUBSTRATE_THICKNESS, # Start point z in m
+        SUBSTRATE_THICKNESS / 1000, # Start point z in m
         0.0001,  # First segment radius
         1,  # Uniform length
         1  # Ratio of adjacent segments
@@ -150,8 +150,7 @@ class Gene:
       0,  # Normalization factor
     ) == 0
 
-    self.fitnessCached = nec_gain_mean(context, 0)
-
+    self.fitnessCached = nec_gain_min(context, 0)
     nec_delete(context)
 
     return self.fitnessCached
