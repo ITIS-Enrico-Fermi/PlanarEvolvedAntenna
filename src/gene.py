@@ -126,30 +126,33 @@ class Gene:
     assert nec_ex_card(  # Excitatoin
       context,
       0,  # Voltage source excitation
-      0,
-      1,
+      self.globalSerial,  # Tag number (from source segment)
+      1,  # N-th segment of the source set of segments
       0,
       1.0, 0, 0, 0, 0, 0  # Tmp
     ) == 0
 
-    # assert nec_excitation_voltage(context, 0, 0, 5, 0) == 0  # Alternative to previous line
     assert nec_rp_card(  # Radiation Pattern
       context,
       0,  # Normal calc mode
-      90,  # Number of theta angles
+      12,  # Number of theta angles
       1,  # Number of phi angles
       0,  # Major-minor axes
       5,  # Total gain normalized
       0,  # Power gain
-      0,  # No averaging
+      0,  # Do averaging
       0,  # Theta zero
       90,  # Phi zero
-      1,  # Theta increment in deg
+      15,  # Theta increment in deg
       0,  # Phi increment in deg
       0,  # Radial distance from origin
-      1,  # Normalization factor
+      0,  # Normalization factor
     ) == 0
 
-    return nec_gain(context, 0, 0, 0)
+    gain = nec_gain_mean(context, 0)
+
+    nec_delete(context)
+
+    return gain
 
     
