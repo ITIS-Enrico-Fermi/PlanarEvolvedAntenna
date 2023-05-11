@@ -9,7 +9,7 @@ from typing import Callable
 
 CONFIG_FILENAME = "config.yaml"
 
-def simulationStep(pop: Population, doPlot: bool, *_) -> None:
+def simulationStep(pop: Population, doPlot: bool, shape_axes, radiation_axes, *_) -> None:
   generation, epoch = next(pop.generations())
   
   logging.info(f"Epoch: {epoch}")
@@ -17,15 +17,20 @@ def simulationStep(pop: Population, doPlot: bool, *_) -> None:
   logging.info(f"Best gene (fitness={generation[0].fitness():.2f}):\n{generation[0]}")
 
   if doPlot:
-    plotPath(f"Epoch: {epoch} - Fitness: {generation[0].fitness():.2f}", generation[0].getCartesianCoords())  # Plot only best performing individual
+    plotPath(
+      title=f"Epoch: {epoch} - Fitness: {generation[0].fitness():.2f}",
+      polychain=generation[0].getCartesianCoords(),  # Plot only best performing individual
+      radiation=generation[0].getRadiationPattern(),
+      axes=(shape_axes, radiation_axes)
+    )
 
 
-def buildSimulation(doPlot: bool, *_) -> Callable[[Population, bool], None]:
+def buildSimulation(doPlot: bool, *args) -> Callable[[Population, bool], None]:
   pop = Population()
 
   signal.signal(signal.SIGINT, lambda *_: print(f"King is: {pop.king}"))
 
-  return partial(simulationStep, pop, doPlot)
+  return partial(simulationStep, pop, doPlot, *args)
 
 
 def main(doPlot: bool):
@@ -39,17 +44,20 @@ def main(doPlot: bool):
   with open(CONFIG_FILENAME, "r") as f:
     Config.loadYaml(f)
 
-  simulation = buildSimulation(doPlot)
     
   if doPlot:
     import matplotlib.pyplot as plt
     import matplotlib.animation as animation
 
     fig = plt.figure()
+    shape = fig.add_subplot(1, 2, 1)
+    radPattern = fig.add_subplot(1, 2, 2, projection='polar')
+    simulation = buildSimulation(doPlot, shape, radPattern)
     anim = animation.FuncAnimation(fig, simulation, interval=10)
     plt.show()
 
   else:
+    simulation = buildSimulation(doPlot)
     while True:
       simulation()
 

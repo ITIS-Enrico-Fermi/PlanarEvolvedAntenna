@@ -3,9 +3,10 @@ import matplotlib.collections as mc
 from typing import List, Tuple
 from config import Config
 from utils.geometry import *
+from rf.radiation import RadiationPattern
 
-def plotPath(title: str, polychain: List[Segment]) -> None:
-  ax = plt.gca()
+def plotPath(title: str, polychain: List[Segment], radiation: RadiationPattern, axes) -> None:
+  ax, radi = axes
   ax.axis("equal")
 
   def plotCansatBottomProfile():
@@ -25,8 +26,13 @@ def plotPath(title: str, polychain: List[Segment]) -> None:
     lineCollection = mc.LineCollection(lines, linewidths=3, color="#4caf50")
     ax.add_collection(lineCollection)
 
-  plt.cla()
+  def plotRadiationPattern():
+    radi.plot(radiation.thetas, radiation.gains_db)
+
+  ax.clear()
+  radi.clear()
   plotCansatBottomProfile()
   plotAntennaPath()
+  plotRadiationPattern()
 
   plt.title(title)

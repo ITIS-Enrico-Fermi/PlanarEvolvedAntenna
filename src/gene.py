@@ -6,6 +6,7 @@ from config import Config
 from utils.geometry import *
 from rf.antenna_util import *
 from rf.context_clean import *
+from rf.radiation import RadiationPattern
 
 
 class Gene:
@@ -34,6 +35,8 @@ class Gene:
       size = Config.GeneEncoding.segmentsNumber)
 
     self.setEncoding(revolutionAngles, segmentLengths)
+
+    self.radiationPattern = None
 
 
   def __lt__(self, other) -> bool:
@@ -152,8 +155,11 @@ class Gene:
 
     self.fitnessCached = nec_gain_mean(context, 0)
 
+    self.radiationPattern = RadiationPattern.from_nec_context(context)
+
     nec_delete(context)
 
     return self.fitnessCached
 
-    
+  def getRadiationPattern(self):
+    return self.radiationPattern
