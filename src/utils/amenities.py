@@ -35,4 +35,5 @@ def plotPath(title: str, polychain: List[Segment], radiation: RadiationPattern, 
   plotAntennaPath()
   plotRadiationPattern()
 
+  plt.savefig(f"results/out.svg")
   plt.title(title)
