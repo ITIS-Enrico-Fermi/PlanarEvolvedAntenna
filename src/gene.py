@@ -1,4 +1,5 @@
 import logging
+import math
 import numpy as np
 from typing import List, Tuple
 from necpp import *
@@ -14,6 +15,7 @@ class Gene:
   def __init__(self, rodEncodedGene: List[PolarCoord] = None):
     self.FIRST_POINT = Point(- Config.ShapeConstraints.outerDiam / 2, 0)
     self.fitnessCached = float("-inf")
+    self.ampK = None
     self.serial = Gene.globalSerial
     Gene.globalSerial += 1
 
@@ -91,6 +93,13 @@ class Gene:
       isPathInCircle(self.polychainEncoding, Point(0, 0), OUTER_RADIUS)
     )
   
+  def ampFactor(self, x: float):
+    if self.ampK is None:
+      self.ampK = ampK = math.exp(-0.002 * (x - 400)) - 1
+    
+    logging.debug(f"ampK: {self.ampK}")
+    return self.ampK
+
   def fitness(self) -> np.float16:
     SUBSTRATE_THICKNESS = 2
     freqHz = Config.ShapeConstraints.targetFreq
@@ -150,7 +159,14 @@ class Gene:
       0,  # Normalization factor
     ) == 0
 
-    self.fitnessCached = nec_gain_min(context, 0)
+    self.fitnessCached = nec_gain_max(context, 0) + self.ampFactor(nec_gain_sd(context, 0))
+    logging.debug(f"Gain\n"
+                 f"\tmin: {nec_gain_min(context, 0)}\n"
+                 f"\tmax: {nec_gain_max(context, 0)}\n"
+                 f"\tmean: {nec_gain_mean(context, 0)}\n"
+                 f"\tsd: {nec_gain_sd(context, 0)}\n"
+                 )
+
     nec_delete(context)
 
     return self.fitnessCached
