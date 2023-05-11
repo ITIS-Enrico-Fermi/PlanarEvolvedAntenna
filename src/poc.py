@@ -1,5 +1,6 @@
 import argparse
 import logging
+import signal
 from utils.amenities import plotPath
 from config import Config
 from population import Population
@@ -22,10 +23,13 @@ def simulationStep(pop: Population, doPlot: bool, *_) -> None:
 def buildSimulation(doPlot: bool, *_) -> Callable[[Population, bool], None]:
   pop = Population()
 
+  signal.signal(signal.SIGINT, lambda *_: print(f"King is: {pop.king}"))
+
   return partial(simulationStep, pop, doPlot)
 
 
 def main(doPlot: bool):
+
   logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s: %(message)s",
