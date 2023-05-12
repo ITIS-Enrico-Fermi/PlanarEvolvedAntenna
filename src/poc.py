@@ -1,15 +1,17 @@
 import argparse
 import logging
 import signal
+from typing import Callable
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
 from utils.amenities import plotPath
 from config import Config
 from population import Population
 from functools import partial
-from typing import Callable
 
 CONFIG_FILENAME = "config.yaml"
 
-def simulationStep(pop: Population, doPlot: bool, shape_axes, radiation_axes, *_) -> None:
+def simulationStep(pop: Population, doPlot: bool, shape_axes: plt.Axes, radiation_axes: plt.Axes, *_) -> None:
   generation, epoch = next(pop.generations())
   
   logging.info(f"Epoch: {epoch}")
@@ -46,9 +48,6 @@ def main(doPlot: bool):
 
     
   if doPlot:
-    import matplotlib.pyplot as plt
-    import matplotlib.animation as animation
-
     fig = plt.figure()
     shape = fig.add_subplot(1, 2, 1)
     radPattern = fig.add_subplot(1, 2, 2, projection='polar')

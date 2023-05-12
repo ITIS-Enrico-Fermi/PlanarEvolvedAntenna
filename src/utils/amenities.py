@@ -5,7 +5,7 @@ from config import Config
 from utils.geometry import *
 from rf.radiation import RadiationPattern
 
-def plotPath(title: str, polychain: List[Segment], radiation: RadiationPattern, axes) -> None:
+def plotPath(title: str, polychain: List[Segment], radiation: RadiationPattern, axes: Tuple[plt.Axes, plt.Axes]) -> None:
   ax, radi = axes
   ax.axis("equal")
 
