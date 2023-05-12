@@ -6,10 +6,10 @@ shape_constraints:
   target_frequency: 868.0e+6  # Hz
 
 genetic_algo_tuning:
-  population_size: 300
+  population_size: 500
   turnover_rate: 0.5  # rate of new individuals generated from crossover
   iterations_number: 1000
-  mutation_rate: 0.1  # rate of individuals that will be mutated at each iteration
+  mutation_rate: 0.2  # rate of individuals that will be mutated at each iteration
   cut_points: 1
 
 gene_encoding:
