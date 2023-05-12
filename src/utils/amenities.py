@@ -18,7 +18,7 @@ def plotPath(title: str, polychain: List[Segment], radiation: RadiationPattern, 
     ax.add_patch(outerCircle)
     
     innerRadius = Config.ShapeConstraints.innerDiam / 2
-    innerCircle = plt.Circle((Config.ShapeConstraints.centerShift, 0), innerRadius, color="#bbdefb")
+    innerCircle = plt.Circle((Config.ShapeConstraints.centerShift, 0), innerRadius, color="#000000")
     ax.add_patch(innerCircle)
   
   def plotAntennaPath():
