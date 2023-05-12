@@ -11,11 +11,12 @@ from rf.radiation import RadiationPattern
 
 
 class Gene:
-  globalSerial: int = 0
-  STANDARD_DEVIATION_K: float = -1e-2  # Penalize high sd
+  globalSerial = 0
+  STANDARD_DEVIATION_K = -1e-2  # Penalize high sd
 
   def __init__(self, rodEncodedGene: List[PolarCoord] = None):
     self.FIRST_POINT = Point(- Config.ShapeConstraints.outerDiam / 2, 0)
+    self.radiationPattern = None
     self.fitnessCached = float("-inf")
     self.serial = Gene.globalSerial
     Gene.globalSerial += 1
@@ -38,7 +39,6 @@ class Gene:
 
     self.setEncoding(revolutionAngles, segmentLengths)
 
-    self.radiationPattern = None
 
 
   def __lt__(self, other) -> bool:
