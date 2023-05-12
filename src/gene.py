@@ -12,11 +12,11 @@ from rf.radiation import RadiationPattern
 
 class Gene:
   globalSerial: int = 0
+  STANDARD_DEVIATION_K: float = -1e-2  # Penalize high sd
 
   def __init__(self, rodEncodedGene: List[PolarCoord] = None):
     self.FIRST_POINT = Point(- Config.ShapeConstraints.outerDiam / 2, 0)
     self.fitnessCached = float("-inf")
-    self.ampK = None
     self.serial = Gene.globalSerial
     Gene.globalSerial += 1
 
@@ -95,13 +95,6 @@ class Gene:
       not doesPathIntersectCircle(self.polychainEncoding, Point(Config.ShapeConstraints.centerShift, 0), INNER_RADIUS) and
       isPathInCircle(self.polychainEncoding, Point(0, 0), OUTER_RADIUS)
     )
-  
-  def ampFactor(self, x: float):
-    if self.ampK is None:
-      self.ampK = ampK = math.exp(-0.002 * (x - 400)) - 1
-    
-    logging.debug(f"ampK: {self.ampK}")
-    return self.ampK
 
   def fitness(self) -> np.float16:
     SUBSTRATE_THICKNESS = 2
@@ -179,7 +172,7 @@ class Gene:
       0,  # Normalization factor
     ) == 0
 
-    self.fitnessCached = nec_gain_max(context, 0) + self.ampFactor(nec_gain_sd(context, 0))
+    self.fitnessCached = nec_gain_max(context, 0) + self.STANDARD_DEVIATION_K * nec_gain_sd(context, 0)
     logging.debug(f"Gain\n"
                  f"\tmin: {nec_gain_min(context, 0)}\n"
                  f"\tmax: {nec_gain_max(context, 0)}\n"
