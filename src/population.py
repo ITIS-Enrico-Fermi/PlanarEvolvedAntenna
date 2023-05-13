@@ -20,8 +20,8 @@ class Population:
       self.fight()
       logging.info(
         f"Fitness\n"
-        f"\tMean: {np.mean([g.fitnessCached for g in self.population])}\n"
-        f"\tSd: {np.std([g.fitnessCached for g in self.population])}"
+        f"\tMean: {np.mean([g.fitnessCached for g in self.population]):.4f}\n"
+        f"\tSd: {np.std([g.fitnessCached for g in self.population]):.4f}"
       )
       self.king = \
         self.population[0] if self.population[0].fitnessCached > self.king.fitnessCached else self.king
