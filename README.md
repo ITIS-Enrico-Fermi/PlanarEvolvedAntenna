@@ -1,4 +1,4 @@
-# Path Evolved Antenna
+# Planar Evolved Antenna
 2-dimensional planar antenna optimized with genetic algorithms.
 
 ## Objectives
