@@ -19,16 +19,21 @@ class Population:
       self.mutate()
       self.fight()
       
+      fitnessMean = np.mean([g.fitnessCached for g in self.population])
+      fitnessStdDev = np.std([g.fitnessCached for g in self.population])
       logging.info(
         f"\nFitness:\n"
-        f"\tMean: {np.mean([g.fitnessCached for g in self.population]):.4f}\n"
-        f"\tSd: {np.std([g.fitnessCached for g in self.population]):.4f}\n"
+        f"\tMean: {fitnessMean:.4f}\n"
+        f"\tSd: {fitnessStdDev:.4f}\n"
         f"Population size: {len(self.population)}"
       )
 
       self.king = \
         self.population[0] if self.population[0].fitnessCached > self.king.fitnessCached else self.king
       
+      if (fitnessStdDev == 0):
+        return
+
       self.generationNumber += 1
       yield self.population, self.generationNumber
     
