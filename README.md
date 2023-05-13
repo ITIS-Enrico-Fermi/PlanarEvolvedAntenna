@@ -13,7 +13,7 @@ A planar antenna can be represented as a path with both cartesian and polar coor
 Trhoughout the simulation (at any given time of it), every path must be contained inside a circle of diameter _outer\_diameter_ - specified in _config.yaml_ file - and must avoid an inner circle of diameter _inner\_diameter_, namely the hole for the onboard camera.
 
 ### Fitness (objective function)
-A linear objective function: $f(max\_gain, std_dev) = max\_gain - \frac{std\_dev}{10}$
+A linear objective function: $f(max\\_gain, std\\_dev) = max\\_gain - \frac{std\\_dev}{10}$
 
 ### Crossover and mutation
 A single cut-point crossover is done a the moment. Crossover recombines genes from the previous generation to reach _population\_size_ individuals.
