@@ -31,7 +31,7 @@ class Population:
       self.king = \
         self.population[0] if self.population[0].fitnessCached > self.king.fitnessCached else self.king
       
-      if (fitnessStdDev == 0):
+      if fitnessStdDev <= np.finfo(np.float32).eps * 1e3:
         return
 
       self.generationNumber += 1

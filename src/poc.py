@@ -16,8 +16,11 @@ def simulationStep(
   doPlot: bool,
   *_,
   **kwargs) -> None:
-  generation, epoch = next(pop.generations())
-  
+  try:
+    generation, epoch = next(pop.generations())
+  except StopIteration:
+    return
+
   logging.info(f"Epoch: {epoch}")
   logging.debug(generation)
   logging.info(f"Best gene (fitness={generation[0].fitness():.2f}):\n{generation[0]}")
