@@ -39,8 +39,6 @@ class Gene:
 
     self.setEncoding(revolutionAngles, segmentLengths)
 
-
-
   def __lt__(self, other) -> bool:
     return self.fitness() < other.fitness()
   

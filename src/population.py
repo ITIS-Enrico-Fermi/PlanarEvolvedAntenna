@@ -18,6 +18,11 @@ class Population:
       self.crossover()
       self.mutate()
       self.fight()
+      logging.info(
+        f"Fitness\n"
+        f"\tMean: {np.mean([g.fitnessCached for g in self.population])}\n"
+        f"\tSd: {np.std([g.fitnessCached for g in self.population])}"
+      )
       self.king = \
         self.population[0] if self.population[0].fitnessCached > self.king.fitnessCached else self.king
       self.generationNumber += 1
@@ -45,14 +50,16 @@ class Population:
     newGenerationSize = floor((1.0 - Config.GeneticAlgoTuning.turnoverRate) * Config.GeneticAlgoTuning.populationSize)
     oldGenerationSize = len(self.population)
 
-    for _ in range(newGenerationSize):
+    for _ in range(newGenerationSize // 2):
       cutpointIdx = randrange(Config.GeneEncoding.segmentsNumber)
       momGeneIdx = randrange(oldGenerationSize)
       dadGeneIdx = randrange(oldGenerationSize)
       momGene = self.population[momGeneIdx]
       dadGene = self.population[dadGeneIdx]
-      newGene = Gene(momGene[:cutpointIdx] + dadGene[cutpointIdx:])
-      self.population.append(newGene)
+      newGene1 = Gene(momGene[:cutpointIdx] + dadGene[cutpointIdx:])
+      newGene2 = Gene(dadGene[:cutpointIdx] + momGene[cutpointIdx:])
+      self.population.append(newGene1)
+      self.population.append(newGene2)
     
   def mutate(self):
     toMutateSize = ceil(Config.GeneticAlgoTuning.mutationRate * len(self.population))
