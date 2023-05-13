@@ -1,8 +1,8 @@
 # Path Evolved Antenna
-2-dimensional patch antenna optimized with genetic algorithms.
+2-dimensional planar antenna optimized with genetic algorithms.
 
 ## Objectives
-The main goal of this project is simulating the evolution of a patch antenna subject to space and shape constraints, in order to maximize isotropic gain and minimize backlobes propagation. The simulation is carried out through a genetic algorithm framed as described in the following paragraphs.
+The main goal of this project is simulating the evolution of a planar antenna subject to space and shape constraints, in order to maximize isotropic gain of the "north" region (toward theta = 0, standar spherical coordinates) and minimize backlobes propagation in the south region. The simulation is carried out through a genetic algorithm framed as described in the following paragraphs.
 
 ## Problem representation
 
@@ -28,10 +28,19 @@ python3 -m pip install -r requirements.txt
 Proof-of-concept:
 ```bash
 cd src
-python3 poc.py [-p]
+python3 poc.py [-p] [-o OUTDIR]
 ```
 
-Where `-p` is the short option for `--plot`.
+Where `-p` is the short option for `--plot`, whereas `-o` stands for `--outdir` (output directory where a bunch of svg files will be saved).
+
+## Outcome evaluation
+> Now the big question. How to interpret the simulation's results? this task can involve a vast set of knowledge. In addition, our interpretation can not only be incomplete, but also partially wrong, so take it with a grain of salt.
+
+A well-formed algorithm should have an increasing monotonic mean fitness (or decreasing if minimizing it): at any given time, the mean/average fitness should be greater than the previous generation's mean/average fitness. Namely, the population is evolving towards better fitness thanks to evolutionary pressure.
+
+On the other hand we have a decreasing fitness's standard deviation, due to the fact that individuals are becoming more and more similar to each other, until they become a single individual cloned N times (for std = 0).
+
+The fitness of the best indiviual can oscillate near the mean. A smaller value can appear, for instance, if a "destructive" mutation hits this indivual.
 
 ## Credits
  - Enlightening _Advanced antenna design for a NASA satellite mission_ paper ([https://digitalcommons.usu.edu/cgi/viewcontent.cgi?article=1426&context=smallsat](https://digitalcommons.usu.edu/cgi/viewcontent.cgi?article=1426&context=smallsat))
