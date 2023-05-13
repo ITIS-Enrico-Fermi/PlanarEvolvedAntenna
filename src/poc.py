@@ -1,10 +1,9 @@
-import argparse
-import logging
-import signal
+import argparse, logging
+import signal, os
 from typing import Callable
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
-from utils.amenities import plotPath
+from utils.amenities import plotPath, saveSvg
 from config import Config
 from population import Population
 from functools import partial
@@ -32,18 +31,19 @@ def simulationStep(
   
   outputDirectory = kwargs.pop("outputDirectory")
   if outputDirectory is not None:
-    print(outputDirectory)
+    with open(os.path.join(outputDirectory, f"gen{epoch}.svg"), "w") as outFile:
+      saveSvg(outFile, generation, kwargs.pop("withBoundaries"))
 
 
 def buildSimulation(doPlot: bool, *_, **kwargs) -> Callable[[Population, bool], None]:
   pop = Population()
 
-  signal.signal(signal.SIGINT, lambda *_: print(f"King is: {pop.king}"))
+  signal.signal(signal.SIGINT, lambda *_: quit())
 
   return partial(simulationStep, pop, doPlot, **kwargs)
 
 
-def main(doPlot: bool, outdir: str):
+def main(doPlot: bool, outdir: str, withBoundaries: bool):
 
   logging.basicConfig(
     level=logging.INFO,
@@ -58,12 +58,18 @@ def main(doPlot: bool, outdir: str):
     fig = plt.figure()
     shape = fig.add_subplot(1, 2, 1)
     radPattern = fig.add_subplot(1, 2, 2, projection='polar')
-    simulation = buildSimulation(doPlot, shapeAxes = shape, radiationAxes = radPattern, outputDirectory = outdir)
+    simulation = buildSimulation(
+      doPlot,
+      shapeAxes = shape,
+      radiationAxes = radPattern,
+      outputDirectory = outdir,
+      withBoundaries = withBoundaries
+    )
     anim = animation.FuncAnimation(fig, simulation, interval=10, cache_frame_data=False)
     plt.show()
     
   else:
-    simulation = buildSimulation(doPlot, outputDirectory = outdir)
+    simulation = buildSimulation(doPlot, outputDirectory = outdir, withBoundaries = withBoundaries)
     while True:
       simulation()
 
@@ -82,7 +88,12 @@ if __name__ == "__main__":
     "-o", "--outdir", help="Save each generation to an svg file inside outdir. May slow down the simulation.",
     type=str, default=None
   )
+  
+  parser.add_argument(
+    "-b", "--with-boundaries", help="Each gene in the svg file will have an underling path representing boundaries.",
+    default=False, action="store_true"
+  )
 
   args = parser.parse_args()
 
-  main(args.plot, args.outdir)
+  main(args.plot, args.outdir, args.with_boundaries)
