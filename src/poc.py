@@ -16,10 +16,7 @@ def simulationStep(
   doPlot: bool,
   *_,
   **kwargs) -> None:
-  try:
-    generation, epoch = next(pop.generations())
-  except StopIteration:
-    return
+  generation, epoch = next(pop.generations())
 
   logging.info(f"Epoch: {epoch}")
   logging.debug(generation)
