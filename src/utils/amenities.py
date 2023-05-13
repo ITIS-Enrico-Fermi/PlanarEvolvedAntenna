@@ -27,7 +27,7 @@ def plotPath(title: str, polychain: List[Segment], radiation: RadiationPattern, 
     ax.add_collection(lineCollection)
 
   def plotRadiationPattern():
-    radi.plot(radiation.thetas, radiation.gains_db)
+    radi.plot(radiation.thetas, radiation.gainsDb)
 
   ax.clear()
   radi.clear()
@@ -35,5 +35,4 @@ def plotPath(title: str, polychain: List[Segment], radiation: RadiationPattern, 
   plotAntennaPath()
   plotRadiationPattern()
 
-  plt.savefig(f"results/out.svg")
   plt.title(title)
