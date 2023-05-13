@@ -18,13 +18,17 @@ class Population:
       self.crossover()
       self.mutate()
       self.fight()
+      
       logging.info(
-        f"Fitness\n"
+        f"\nFitness:\n"
         f"\tMean: {np.mean([g.fitnessCached for g in self.population]):.4f}\n"
-        f"\tSd: {np.std([g.fitnessCached for g in self.population]):.4f}"
+        f"\tSd: {np.std([g.fitnessCached for g in self.population]):.4f}\n"
+        f"Population size: {len(self.population)}"
       )
+
       self.king = \
         self.population[0] if self.population[0].fitnessCached > self.king.fitnessCached else self.king
+      
       self.generationNumber += 1
       yield self.population, self.generationNumber
     
