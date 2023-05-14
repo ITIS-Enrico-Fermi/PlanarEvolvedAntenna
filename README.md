@@ -5,7 +5,7 @@
 The main goal of this project is simulating the evolution of a planar antenna subject to space and shape constraints, in order to maximize isotropic gain of the "north" region (toward theta = 0, standar spherical coordinates) and minimize backlobes propagation in the south region. The simulation is carried out through a genetic algorithm framed as described in the following paragraphs.
 
 ## Problem representation
-![assets/interpretation.png](assets/interpretation.png)
+<img src="assets/interpretation.png" height="200">
 
 ### Encoding
 A planar antenna can be represented as a path with both cartesian and polar coordinates. The latter is our case (see rod-based robots). Each segment of the polygonal chain is a polar coordinate (angle, distance) whose origin is the end-point of the previous segment. 
@@ -19,7 +19,7 @@ A linear objective function: $f(max\\_gain, std\\_dev) = max\\_gain - \frac{std\
 
 ### Crossover and mutation
 A single cut-point crossover is done a the moment. Crossover recombines genes from the previous generation to reach _population\_size_ individuals.
-![assets/crossover.png](assets/crossover.png)
+<img src="assets/crossover.png" height="400">
 
 Mutation is a draw without replacement of _mutation\_rate_ * _population\_size_ individuals to which a random mutation (for both angles and lengths) is applied.
 
