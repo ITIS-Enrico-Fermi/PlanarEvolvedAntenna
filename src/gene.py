@@ -10,7 +10,7 @@ from rf.radiation import RadiationPattern, RpCardEvaluationInput
 
 class Gene:
   globalSerial = 0
-  MAX_GAIN_K = 1
+  GAIN_K = 1
   STANDARD_DEVIATION_K = -1  # Penalize high sd
 
   def __init__(self, rodEncodedGene: List[PolarCoord] = None):
@@ -97,7 +97,7 @@ class Gene:
     )
 
   def fitness(self) -> np.float16:
-    SUBSTRATE_THICKNESS = 2
+    SUBSTRATE_THICKNESS = 3
     freqHz = Config.ShapeConstraints.targetFreq
     wavelength = 299792e3 / freqHz
     context = nec_create()
@@ -173,8 +173,42 @@ class Gene:
         0,  # Normalization factor
       ) == 0
 
+      assert nec_rp_card(  # Radiation Pattern
+        context,
+        0,  # Normal calc mode
+        6,  # Number of theta angles
+        1,  # Number of phi angles
+        0,  # Major-minor axes
+        5,  # Total gain normalized
+        0,  # Power gain
+        0,  # Do averaging
+        75,  # Theta zero
+        90,  # Phi zero
+        -15,  # Theta increment in deg
+        0,  # Phi increment in deg
+        0,  # Radial distance from origin
+        0,  # Normalization factor
+      ) == 0
+
+      assert nec_rp_card(  # Radiation Pattern
+        context,
+        0,  # Normal calc mode
+        5,  # Number of theta angles
+        1,  # Number of phi angles
+        0,  # Major-minor axes
+        5,  # Total gain normalized
+        0,  # Power gain
+        0,  # Do averaging
+        15,  # Theta zero
+        270,  # Phi zero
+        15,  # Theta increment in deg
+        0,  # Phi increment in deg
+        0,  # Radial distance from origin
+        0,  # Normalization factor
+      ) == 0
+
       self.fitnessCached = \
-        self.MAX_GAIN_K * nec_gain_max(context, 0) + \
+        self.GAIN_K * nec_gain_min(context, 0) + \
         self.STANDARD_DEVIATION_K * nec_gain_sd(context, 0)
       
       logging.debug(f"Gain\n"
