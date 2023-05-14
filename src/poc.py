@@ -3,7 +3,7 @@ import signal, os
 from typing import Callable
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
-from utils.amenities import plotPath, saveSvg
+from utils.amenities import plotPathAndRad, saveSvg
 from config import Config
 from population import Population
 from functools import partial
@@ -22,7 +22,7 @@ def simulationStep(
   logging.info(f"Best gene (fitness={generation[0].fitness():.2f}):\n{generation[0]}")
 
   if doPlot:
-    plotPath(
+    plotPathAndRad(
       title=f"Epoch: {epoch} - Fitness: {generation[0].fitness():.2f}",
       polychain=generation[0].getCartesianCoords(),  # Plot only best performing individual
       radiation=generation[0].getRadiationPattern(),

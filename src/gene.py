@@ -5,12 +5,13 @@ from config import Config
 from utils.geometry import *
 from rf.antenna_util import *
 from rf.context_clean import *
-from rf.radiation import RadiationPattern
+from rf.radiation import RadiationPattern, RpCardEvaluationInput
 
 
 class Gene:
   globalSerial = 0
-  STANDARD_DEVIATION_K = -1e-2  # Penalize high sd
+  MAX_GAIN_K = 1
+  STANDARD_DEVIATION_K = -1  # Penalize high sd
 
   def __init__(self, rodEncodedGene: List[PolarCoord] = None):
     self.FIRST_POINT = Point(- Config.ShapeConstraints.outerDiam / 2, 0)
@@ -69,6 +70,9 @@ class Gene:
     return np.asarray(
       list(zip(*self.rodEncoding))[1]
     )
+
+  def getRadiationPattern(self) -> RadiationPattern:
+    return self.radiationPattern
   
   def setEncoding(self, angles: List[float], lengths: List[float]) -> None:
     self.rodEncoding = list(zip(angles, lengths))
@@ -114,7 +118,7 @@ class Gene:
           1,  # Uniform length
           1  # Ratio of adjacent segments
         ) == 0
-
+      
       assert nec_geometry_complete(context, 0) == 0  # inner 0 means no ground-plane
       assert nec_gn_card(context, 1, 0, 0, 0, 0, 0, 0, 0) == 0  # Infinite ground plane
       
@@ -138,15 +142,15 @@ class Gene:
       assert nec_rp_card(  # Radiation Pattern
         context,
         0,  # Normal calc mode
-        7,  # Number of theta angles
+        6,  # Number of theta angles
         1,  # Number of phi angles
         0,  # Major-minor axes
         5,  # Total gain normalized
         0,  # Power gain
         0,  # Do averaging
-        0,  # Theta zero
+        75,  # Theta zero
         0,  # Phi zero
-        15,  # Theta increment in deg
+        -15,  # Theta increment in deg
         0,  # Phi increment in deg
         0,  # Radial distance from origin
         0,  # Normalization factor
@@ -155,7 +159,7 @@ class Gene:
       assert nec_rp_card(  # Radiation Pattern
         context,
         0,  # Normal calc mode
-        6,  # Number of theta angles
+        5,  # Number of theta angles
         1,  # Number of phi angles
         0,  # Major-minor axes
         5,  # Total gain normalized
@@ -169,7 +173,10 @@ class Gene:
         0,  # Normalization factor
       ) == 0
 
-      self.fitnessCached = nec_gain_max(context, 0) + self.STANDARD_DEVIATION_K * nec_gain_sd(context, 0)
+      self.fitnessCached = \
+        self.MAX_GAIN_K * nec_gain_max(context, 0) + \
+        self.STANDARD_DEVIATION_K * nec_gain_sd(context, 0)
+      
       logging.debug(f"Gain\n"
                   f"\tmin: {nec_gain_min(context, 0)}\n"
                   f"\tmax: {nec_gain_max(context, 0)}\n"
@@ -177,15 +184,18 @@ class Gene:
                   f"\tsd: {nec_gain_sd(context, 0)}\n"
                   )
 
-      self.radiationPattern = RadiationPattern.from_nec_context(context)
+      self.radiationPattern = RadiationPattern.fromNecContext(
+        context,
+        [
+          RpCardEvaluationInput(15, 15*5 + 15, 15, 0, 0, 1),  # theta in [75, 0] mapped to [15, 90]
+          RpCardEvaluationInput(15 + 90, 15*4 + 15 + 90, 15, 180, 180, 1)  # theta in [15, 75] mapped to [105, 165]
+        ]
+      )
 
       nec_delete(context)
 
     except AssertionError:
       self.fitnessCached = float("-inf")  # This gene will be discarded at the next iteration
-    
+
     finally:
       return self.fitnessCached
-
-  def getRadiationPattern(self):
-    return self.radiationPattern
