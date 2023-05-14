@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from utils.amenities import plotPathAndRad, saveSvg
 from config import Config
-from population import Population
+from core.population import Population
 from functools import partial
 
 CONFIG_FILENAME = "config.yaml"
