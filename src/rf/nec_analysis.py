@@ -18,10 +18,10 @@ class NecAnalysis:
         1,  # Segment count
         segment.start.x / 1000,  # Start point x in m
         segment.start.y / 1000,  # Start point y in m
-        3 / 1000,  # Start point z in m
+        self.gene.groundPlaneDistance / 1000,  # Start point z in m
         segment.end.x / 1000,  # Start point x in m
         segment.end.y / 1000,  # Start point y in m
-        3 / 1000, # Start point z in m
+        self.gene.groundPlaneDistance / 1000, # Start point z in m
         0.0001,  # First segment radius
         1,  # Uniform length
         1  # Ratio of adjacent segments
@@ -79,7 +79,7 @@ class NecAnalysis:
     return RadiationPattern.fromNecContext(
       self.context,
       [
-        RpCardEvaluationInput(15, 15*5 + 15, 15, 0, 0, 1),  # theta in [75, 0] mapped to [15, 90]
-        RpCardEvaluationInput(15 + 90, 15*4 + 15 + 90, 15, 180, 180, 1)  # theta in [15, 75] mapped to [105, 165]
+        RpCardEvaluationInput(30, 15*4 + 30, 9, 0, 0, 0),  # theta in [75, 0] mapped to [15, 90]
+        RpCardEvaluationInput(15 + 90, 15*3 + 15 + 90, 9, 180, 180, 0)  # theta in [15, 75] mapped to [105, 165]
       ]
     )
