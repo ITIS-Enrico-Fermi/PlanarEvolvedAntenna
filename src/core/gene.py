@@ -14,8 +14,11 @@ class Gene:
 
   def __init__(self, rodEncodedGene: List[PolarCoord] = None):
     self.FIRST_POINT = Point(- Config.ShapeConstraints.outerDiam / 2, 0)
+
     self.radiationPattern = None
     self.fitnessCached = float("-inf")
+    self.groundPlaneDistance = Config.ShapeConstraints.groundPlaneDistance
+
     self.serial = Gene.globalSerial
     Gene.globalSerial += 1
 
@@ -96,7 +99,6 @@ class Gene:
     )
 
   def fitness(self) -> np.float16:
-    SUBSTRATE_THICKNESS = 3
     freqHz = Config.ShapeConstraints.targetFreq
 
     try:
@@ -106,10 +108,10 @@ class Gene:
         sim.addInfiniteGroundPlane()
         sim.runExcitation()
         self.radiationPattern = sim.computeRadiationPattern([
-          RpCardEvaluationInput(75, 0, -15, 0, 0, 0),
-          RpCardEvaluationInput(15, 75, 15, 180, 180, 0),
-          RpCardEvaluationInput(75, 0, -15, 90, 90, 0),
-          RpCardEvaluationInput(15, 75, 15, 270, 270, 0)
+          RpCardEvaluationInput(60, 0, -9, 0, 0, 0),
+          RpCardEvaluationInput(15, 60, 9, 180, 180, 0),
+          RpCardEvaluationInput(60, 0, -9, 90, 90, 0),
+          RpCardEvaluationInput(15, 60, 9, 270, 270, 0)
         ])
 
         self.fitnessCached = \

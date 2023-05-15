@@ -8,6 +8,7 @@ class Config:
     innerDiam: float
     centerShift: float
     targetFreq: float
+    groundPlaneDistance: float
   
   class GeneticAlgoTuning:
     populationSize: int
@@ -30,6 +31,7 @@ class Config:
     Config.ShapeConstraints.innerDiam = d["shape_constraints"]["inner_diameter"]
     Config.ShapeConstraints.centerShift = d["shape_constraints"]["center_shift"]
     Config.ShapeConstraints.targetFreq = d["shape_constraints"]["target_frequency"]
+    Config.ShapeConstraints.groundPlaneDistance = d["shape_constraints"]["ground_plane_distance"]
 
     Config.GeneticAlgoTuning.populationSize = d["genetic_algo_tuning"]["population_size"]
     Config.GeneticAlgoTuning.iterationsNumber = d["genetic_algo_tuning"]["iterations_number"]
