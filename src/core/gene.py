@@ -139,5 +139,4 @@ class Gene:
     except AssertionError:
       self.fitnessCached = float("-inf")  # This gene will be discarded at the next iteration
 
-    finally:
-      return self.fitnessCached
+    return self.fitnessCached

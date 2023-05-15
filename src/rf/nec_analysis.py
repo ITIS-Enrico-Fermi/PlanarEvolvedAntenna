@@ -30,7 +30,7 @@ class NecAnalysis:
     assert nec_geometry_complete(self.context, 0) == 0  # inner 0 means no ground-plane
     return self
 
-  def __exit__(self):
+  def __exit__(self, *_):
     nec_delete(self.context)
   
   def getNecContext(self) -> Any:
