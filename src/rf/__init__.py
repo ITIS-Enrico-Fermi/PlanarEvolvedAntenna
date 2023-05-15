@@ -1,1 +1,1 @@
-__all__ = ["antenna_util", "context_clean", "radiation"]
+__all__ = ["antenna_util", "context_clean", "radiation", "nec_analysis"]
