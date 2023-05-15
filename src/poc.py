@@ -25,8 +25,9 @@ def simulationStep(
     plotPathAndRad(
       title=f"Epoch: {epoch} - Fitness: {generation[0].fitness():.2f}",
       polychain=generation[0].getCartesianCoords(),  # Plot only best performing individual
-      radiation=generation[0].getRadiationPattern(),
-      axes=(kwargs.pop("shapeAxes"), kwargs.pop("radiationAxes"))
+      radiationSagittal=generation[0].getRadiationPatternSagittal(),
+      radiationFrontal=generation[0].getRadiationPatternFrontal(),
+      axes=(kwargs.pop("shapeAxes"), kwargs.pop("radiationAxesSag"), kwargs.pop("radiationAxesFront"))
     )
   
   outputDirectory = kwargs.pop("outputDirectory")
@@ -56,12 +57,14 @@ def main(doPlot: bool, outdir: str, withBoundaries: bool):
     
   if doPlot:
     fig = plt.figure()
-    shape = fig.add_subplot(1, 2, 1)
-    radPattern = fig.add_subplot(1, 2, 2, projection='polar')
+    shape = fig.add_subplot(1, 3, 1)
+    radPatternSag = fig.add_subplot(1, 3, 2, projection='polar')
+    radPatternFront = fig.add_subplot(1, 3, 3, projection='polar')
     simulation = buildSimulation(
       doPlot,
       shapeAxes = shape,
-      radiationAxes = radPattern,
+      radiationAxesSag = radPatternSag,
+      radiationAxesFront = radPatternFront,
       outputDirectory = outdir,
       withBoundaries = withBoundaries
     )

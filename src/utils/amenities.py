@@ -27,15 +27,17 @@ def plotAntennaPath(axes: plt.Axes, polychain: List[Segment], color: str = "#4ca
 def plotRadiationPatternSlice(axes: plt.Axes, radiation: RadiationPattern):
   axes.plot(radiation.thetasRad, radiation.gainsMw)
 
-def plotPathAndRad(title: str, polychain: List[Segment], radiation: RadiationPattern, axes: Tuple[plt.Axes, plt.Axes]) -> None:
-  ax, radi = axes
+def plotPathAndRad(title: str, polychain: List[Segment], radiationSagittal: RadiationPattern, radiationFrontal: RadiationPattern, axes: Tuple[plt.Axes, plt.Axes, plt.Axes]) -> None:
+  ax, radiSag, radiFront = axes
   ax.axis("equal")
   ax.clear()
-  radi.clear()
+  radiSag.clear()
+  radiFront.clear()
 
   plotCansatBottomProfile(ax)
   plotAntennaPath(ax, polychain)
-  plotRadiationPatternSlice(radi, radiation)
+  plotRadiationPatternSlice(radiSag, radiationSagittal)
+  plotRadiationPatternSlice(radiFront, radiationFrontal)
 
   plt.title(title)
 

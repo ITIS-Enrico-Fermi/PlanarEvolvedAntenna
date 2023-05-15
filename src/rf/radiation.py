@@ -14,6 +14,8 @@ class RpCardEvaluationInput:
   phiEnd: float = field(default_factory=float)
   phiIncrement: float = field(default_factory=float)
   phiNum: float = field(default_factory=float, init=False)
+  
+  index: int = field(default_factory=int)
 
   def __post_init__(self):
     self.thetaNum = abs(self.thetaEnd - self.thetaStart) // abs(self.thetaIncrement) + 1 if self.thetaIncrement != 0 else 1
@@ -32,11 +34,11 @@ class RadiationPattern:
     thetasRad = []
     phisRad = []
 
-    for evalIdx, evaluation in enumerate(rpEvaluations):
+    for evaluation in rpEvaluations:
       assert evaluation.thetaEnd >= evaluation.thetaStart
       assert evaluation.phiEnd >= evaluation.phiStart
       gainsDb = np.array([
-        nec_gain(ctx, evalIdx, i, j)
+        nec_gain(ctx, evaluation.index, i, j)
         for i in range(evaluation.thetaNum)
         for j in range(evaluation.phiNum)
       ])

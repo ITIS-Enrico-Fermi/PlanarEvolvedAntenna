@@ -79,7 +79,23 @@ class NecAnalysis:
     return RadiationPattern.fromNecContext(
       self.context,
       [
-        RpCardEvaluationInput(30, 15*4 + 30, 9, 0, 0, 0),  # theta in [75, 0] mapped to [15, 90]
-        RpCardEvaluationInput(15 + 90, 15*3 + 15 + 90, 9, 180, 180, 0)  # theta in [15, 75] mapped to [105, 165]
+        RpCardEvaluationInput(
+          90 - evaluations[0].thetaStart,
+          90 - evaluations[0].thetaEnd,
+          evaluations[0].thetaIncrement,
+          evaluations[0].phiStart,
+          evaluations[0].phiEnd,
+          evaluations[0].phiIncrement,
+          evaluations[0].index
+        ),
+        RpCardEvaluationInput(
+          90 + evaluations[1].thetaStart,
+          90 + evaluations[1].thetaEnd,
+          evaluations[1].thetaIncrement,
+          evaluations[1].phiStart,
+          evaluations[1].phiEnd,
+          evaluations[1].phiIncrement,
+          evaluations[1].index
+        )
       ]
     )

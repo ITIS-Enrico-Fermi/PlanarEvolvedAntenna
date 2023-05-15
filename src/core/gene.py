@@ -15,7 +15,8 @@ class Gene:
   def __init__(self, rodEncodedGene: List[PolarCoord] = None):
     self.FIRST_POINT = Point(- Config.ShapeConstraints.outerDiam / 2, 0)
 
-    self.radiationPattern = None
+    self.radiationPatternSagittal = None
+    self.radiationPatternFrontal = None
     self.fitnessCached = float("-inf")
     self.groundPlaneDistance = Config.ShapeConstraints.groundPlaneDistance
 
@@ -73,8 +74,11 @@ class Gene:
       list(zip(*self.rodEncoding))[1]
     )
 
-  def getRadiationPattern(self) -> RadiationPattern:
-    return self.radiationPattern
+  def getRadiationPatternSagittal(self) -> RadiationPattern:
+    return self.radiationPatternSagittal
+  
+  def getRadiationPatternFrontal(self) -> RadiationPattern:
+    return self.radiationPatternFrontal
   
   def setEncoding(self, angles: List[float], lengths: List[float]) -> None:
     self.rodEncoding = list(zip(angles, lengths))
@@ -107,23 +111,29 @@ class Gene:
 
         sim.addInfiniteGroundPlane()
         sim.runExcitation()
-        self.radiationPattern = sim.computeRadiationPattern([
-          RpCardEvaluationInput(60, 0, -9, 0, 0, 0),
-          RpCardEvaluationInput(15, 60, 9, 180, 180, 0),
-          RpCardEvaluationInput(60, 0, -9, 90, 90, 0),
-          RpCardEvaluationInput(15, 60, 9, 270, 270, 0)
+        
+        self.radiationPatternSagittal = sim.computeRadiationPattern([
+          RpCardEvaluationInput(60, 0, -15, 45, 45, 0, 0),  # sagittal plane (1)
+          RpCardEvaluationInput(15, 60, 15, 225, 225, 0, 1)  # sagittal plane (2)
         ])
 
-        self.fitnessCached = \
-          self.GAIN_K * nec_gain_min(context, 0) + \
-          self.STANDARD_DEVIATION_K * nec_gain_sd(context, 0)
+        self.radiationPatternFrontal = sim.computeRadiationPattern([
+          RpCardEvaluationInput(60, 0, -15, 135, 135, 0, 2),  # frontal plane (1)
+          RpCardEvaluationInput(15, 60, 15, 315, 315, 0, 3)  # frontal plane (2)
+        ])
+
+
+        min_gain = min([nec_gain_min(context, i) for i in range(4)])
+        sd_gain = max([nec_gain_sd(context, i) for i in range(4)])
+        max_gain = max([nec_gain_max(context, i) for i in range(4)])
+        self.fitnessCached = self.GAIN_K * min_gain + self.STANDARD_DEVIATION_K * sd_gain
         
         logging.debug(
           f"Gain\n"
-          f"\tmin: {nec_gain_min(context, 0)}\n"
-          f"\tmax: {nec_gain_max(context, 0)}\n"
-          f"\tmean: {nec_gain_mean(context, 0)}\n"
-          f"\tsd: {nec_gain_sd(context, 0)}\n"
+          f"\tmin: {min_gain}\n"
+          f"\tmax: {max_gain}\n"
+          f"\tsd: {sd_gain}\n"
+          # f"\tmean: {nec_gain_mean(context, 0)}\n"
         )
 
     except AssertionError:
