@@ -15,7 +15,7 @@ Trhoughout the simulation (at any given time of it), every path must be containe
 ![assets/invalid_genes.png](assets/invalid_genes.png)
 
 ### Fitness (objective function)
-A linear objective function: $f(max\\_gain, std\\_dev) = max\\_gain - \frac{std\\_dev}{10}$
+A linear objective function: $f(min\\_gain, std\\_dev) = k1 min\\_gain + k2\frac{std\\_dev}{10}$
 
 ### Crossover and mutation
 A single cut-point crossover is done a the moment. Crossover recombines genes from the previous generation to reach _population\_size_ individuals.
