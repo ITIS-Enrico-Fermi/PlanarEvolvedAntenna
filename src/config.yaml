@@ -7,8 +7,8 @@ shape_constraints:
   center_shift: 5.6  # mm
 
 genetic_algo_tuning:
-  population_size: 500
-  turnover_rate: 0.3  # rate of new individuals generated from crossover
+  population_size: 300
+  turnover_rate: 0.5  # rate of new individuals generated from crossover
   iterations_number: 400
   mutation_rate: 0.5  # rate of individuals that will be mutated at each iteration
   cut_points: 1
