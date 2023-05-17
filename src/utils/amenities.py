@@ -1,4 +1,5 @@
 import math
+import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.collections as mc
 from typing import List, Tuple, IO, Any
@@ -6,11 +7,12 @@ from config import Config
 from utils.geometry import *
 from rf.radiation import RadiationPattern
 
+CANSAT_RED = '#ffcdd2'
 
 def plotCansatBottomProfile(axes: plt.Axes):
   SAFE_MARGIN = 0.05
   outerRadius = Config.ShapeConstraints.outerDiam / 2
-  outerCircle = plt.Circle((0, 0), outerRadius, color='#ffcdd2')
+  outerCircle = plt.Circle((0, 0), outerRadius, color=CANSAT_RED)
   axes.set_xlim((-outerRadius - SAFE_MARGIN*outerRadius, outerRadius + SAFE_MARGIN * outerRadius))
   axes.set_ylim((-outerRadius - SAFE_MARGIN*outerRadius, outerRadius + SAFE_MARGIN * outerRadius))
   axes.add_patch(outerCircle)
@@ -18,6 +20,10 @@ def plotCansatBottomProfile(axes: plt.Axes):
   innerRadius = Config.ShapeConstraints.innerDiam / 2
   innerCircle = plt.Circle((Config.ShapeConstraints.centerShift, 0), innerRadius, color='#000000')
   axes.add_patch(innerCircle)
+
+def plotCansatProfile(axes: plt.Axes, len: float, downwardOffset: float):
+  alpha = np.arcsin(downwardOffset / len)
+  axes.plot([alpha, np.pi - alpha], [len, len], color=CANSAT_RED, linewidth=5)
 
 def plotAntennaPath(axes: plt.Axes, polychain: List[Segment], color: str = "#4caf50", width: int = 3):
   lines = [line.toList() for line in polychain]
@@ -27,7 +33,14 @@ def plotAntennaPath(axes: plt.Axes, polychain: List[Segment], color: str = "#4ca
 def plotRadiationPatternSlice(axes: plt.Axes, radiation: RadiationPattern):
   axes.plot(radiation.thetasRad, radiation.gainsMw)
 
-def plotPathAndRad(title: str, polychain: List[Segment], radiationSagittal: RadiationPattern, radiationFrontal: RadiationPattern, axes: Tuple[plt.Axes, plt.Axes, plt.Axes]) -> None:
+def plotPathAndRad(
+    title: str,
+    polychain: List[Segment],
+    radiationSagittal: RadiationPattern,
+    radiationFrontal: RadiationPattern,
+    groundPlaneDistance: float,
+    axes: Tuple[plt.Axes, plt.Axes, plt.Axes]
+  ) -> None:
   ax, radiSag, radiFront = axes
   ax.axis("equal")
   ax.clear()
@@ -36,7 +49,11 @@ def plotPathAndRad(title: str, polychain: List[Segment], radiationSagittal: Radi
 
   plotCansatBottomProfile(ax)
   plotAntennaPath(ax, polychain)
+
+  plotCansatProfile(radiSag, max(radiationSagittal.gainsMw), -groundPlaneDistance/30)
   plotRadiationPatternSlice(radiSag, radiationSagittal)
+
+  plotCansatProfile(radiFront, max(radiationFrontal.gainsMw), -groundPlaneDistance/30)
   plotRadiationPatternSlice(radiFront, radiationFrontal)
 
   plt.title(title)

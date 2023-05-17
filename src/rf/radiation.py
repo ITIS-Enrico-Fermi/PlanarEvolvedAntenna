@@ -27,6 +27,7 @@ class RadiationPattern:
   gainsMw: List[float] = field(default_factory=list)
   thetasRad: List[float] = field(default_factory=list)
   phisRad: List[float] = field(default_factory=list)
+  groundPlaneDistance: float = field(default_factory=float)
 
   @classmethod
   def fromNecContext(cls, ctx, rpEvaluations: List[RpCardEvaluationInput]):

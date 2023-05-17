@@ -12,13 +12,17 @@ class Gene:
   STANDARD_DEVIATION_K = 0
   # STANDARD_DEVIATION_K = -1  # Penalize high sd
 
-  def __init__(self, rodEncodedGene: List[PolarCoord] = None):
+  def __init__(self, rodEncodedGene: List[PolarCoord] = None, groundPlaneDist: float = 1):
     self.FIRST_POINT = Point(- Config.ShapeConstraints.outerDiam / 2, 0)
 
     self.radiationPatternSagittal = None
     self.radiationPatternFrontal = None
     self.fitnessCached = float("-inf")
-    self.groundPlaneDistance = Config.ShapeConstraints.groundPlaneDistance
+    self.groundPlaneDistance = np.random.uniform(
+      low = Config.ShapeConstraints.groundPlaneDistanceMin,
+      high = Config.ShapeConstraints.groundPlaneDistanceMax,
+      size = 1
+    )[0]
 
     self.serial = Gene.globalSerial
     Gene.globalSerial += 1
@@ -29,6 +33,7 @@ class Gene:
         self.FIRST_POINT,
         rodToPolar(self.rodEncoding)
       )
+      self.groundPlaneDistance = groundPlaneDist
       return
 
     revolutionAngles = (np.random.rand(Config.GeneEncoding.segmentsNumber) - 0.5) * \
@@ -85,9 +90,12 @@ class Gene:
     self.rodEncoding = [PolarCoord(a, l) for (a, l) in self.rodEncoding]
 
     self.polychainEncoding = polarToPolychain(
-        self.FIRST_POINT,
-        rodToPolar(self.rodEncoding)
-      )
+      self.FIRST_POINT,
+      rodToPolar(self.rodEncoding)
+    )
+  
+  def setGroundPlaneDistance(self, gpDist: float) -> None:
+    self.groundPlaneDistance = gpDist
 
   def isValid(self) -> bool:
     """Returns true if the path is not slef-intersecting

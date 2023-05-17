@@ -19,19 +19,19 @@ class Population:
       self.mutate()
       self.fight()
       
-      fitnessMean = np.mean([g.fitnessCached for g in self.population])
-      fitnessStdDev = np.std([g.fitnessCached for g in self.population])
+      self.fitnessMean = np.mean([g.fitnessCached for g in self.population])
+      self.fitnessStdDev = np.std([g.fitnessCached for g in self.population])
       logging.info(
         f"\nFitness:\n"
-        f"\tMean: {fitnessMean:.4f}\n"
-        f"\tSd: {fitnessStdDev:.4f}\n"
+        f"\tMean: {self.fitnessMean:.4f}\n"
+        f"\tSd: {self.fitnessStdDev:.4f}\n"
         f"Population size: {len(self.population)}"
       )
 
       self.king = \
         self.population[0] if self.population[0].fitnessCached > self.king.fitnessCached else self.king
       
-      if fitnessStdDev <= np.finfo(np.float32).eps:
+      if self.fitnessStdDev <= np.finfo(np.float32).eps:
         return
 
       self.generationNumber += 1
@@ -65,8 +65,14 @@ class Population:
       dadGeneIdx = randrange(oldGenerationSize)
       momGene = self.population[momGeneIdx]
       dadGene = self.population[dadGeneIdx]
-      newGene1 = Gene(momGene[:cutpointIdx] + dadGene[cutpointIdx:])
-      newGene2 = Gene(dadGene[:cutpointIdx] + momGene[cutpointIdx:])
+      newGene1 = Gene(
+        momGene[:cutpointIdx] + dadGene[cutpointIdx:],
+        np.average([dadGene.groundPlaneDistance, momGene.groundPlaneDistance])
+      )
+      newGene2 = Gene(
+        dadGene[:cutpointIdx] + momGene[cutpointIdx:],
+        np.average([dadGene.groundPlaneDistance, momGene.groundPlaneDistance])
+      )
       self.population.append(newGene1)
       self.population.append(newGene2)
     
@@ -84,6 +90,12 @@ class Population:
         size = Config.GeneEncoding.segmentsNumber
       )
 
+      mutationGpDistance = np.random.uniform(
+        low = Config.ShapeConstraints.groundPlaneDistanceMin,
+        high = Config.ShapeConstraints.groundPlaneDistanceMax,
+        size = 1
+      )[0]
+
       newAngles = np.clip(
         gene.getAngleArray() + mutationAngles,
         - Config.GeneEncoding.maxAngle / 2,
@@ -97,3 +109,4 @@ class Population:
       )
 
       gene.setEncoding(newAngles, newLengths)
+      gene.setGroundPlaneDistance(mutationGpDistance)

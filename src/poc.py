@@ -26,11 +26,15 @@ def simulationStep(
 
   if doPlot:
     plotPathAndRad(
-      title=f"Epoch: {epoch} - Fitness: {generation[0].fitness():.2f}",
-      polychain=generation[0].getCartesianCoords(),  # Plot only best performing individual
-      radiationSagittal=generation[0].getRadiationPatternSagittal(),
-      radiationFrontal=generation[0].getRadiationPatternFrontal(),
-      axes=(kwargs.pop("shapeAxes"), kwargs.pop("radiationAxesSag"), kwargs.pop("radiationAxesFront"))
+      title = f"Epoch: {epoch} -\n"
+        f"Best fitness: {generation[0].fitness():.2f} -\n"
+        f"Mean fitness: {pop.fitnessMean:.2f} -\n"
+        f"Sd fitness: {pop.fitnessStdDev:.2f}",
+      polychain = generation[0].getCartesianCoords(),  # Plot only best performing individual
+      radiationSagittal = generation[0].getRadiationPatternSagittal(),
+      radiationFrontal = generation[0].getRadiationPatternFrontal(),
+      groundPlaneDistance = generation[0].groundPlaneDistance,
+      axes = (kwargs.pop("shapeAxes"), kwargs.pop("radiationAxesSag"), kwargs.pop("radiationAxesFront"))
     )
   
   outputDirectory = kwargs.pop("outputDirectory")
