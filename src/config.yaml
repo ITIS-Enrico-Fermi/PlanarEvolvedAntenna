@@ -1,7 +1,8 @@
 ---
 shape_constraints:
   target_frequency: 868.0e+6  # Hz
-  ground_plane_distance: 3  # mm
+  gp_distance_min: 1  # mm
+  gp_distance_max: 100  # mm
   outer_diameter: 66  # mm
   inner_diameter: 7  # mm
   center_shift: 5.6  # mm
