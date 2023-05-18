@@ -18,7 +18,8 @@ Trhoughout the simulation (at any given time of it), every path must be containe
 A linear objective function: $f(min\\_gain, std\\_dev) = k1 \cdot min\\_gain + k2 \cdot std\\_dev$
 
 ### Crossover and mutation
-A single cut-point crossover is done a the moment. Crossover recombines genes from the previous generation to reach _population\_size_ individuals.
+A single cut-point crossover is done at the moment. Crossover recombines genes from the previous generation to reach _population\_size_ individuals.
+
 <img src="assets/crossover.png" height="400">
 
 Mutation is a draw without replacement of _mutation\_rate_ * _population\_size_ individuals to which a random mutation (for both angles and lengths) is applied.
