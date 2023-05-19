@@ -6,6 +6,7 @@ from typing import List, Tuple, IO, Any
 from config import Config
 from utils.geometry import *
 from rf.radiation import RadiationPattern
+from core.gene import Gene
 
 CANSAT_RED = '#ffcdd2'
 
@@ -58,7 +59,7 @@ def plotPathAndRad(
 
   plt.title(title)
 
-def saveSvg(stream: IO[Any], generation: List[List[PolarCoord]], doPlotConstraints: bool):
+def saveSvg(stream: IO[Any], generation: List[Gene], doPlotConstraints: bool):
   fig = plt.figure()
   edgeLen = math.floor(math.sqrt(len(generation)))
   axes = fig.subplots(edgeLen, edgeLen)
