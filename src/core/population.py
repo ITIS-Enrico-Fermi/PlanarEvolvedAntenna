@@ -17,7 +17,7 @@ class Population:
     """
     Interface method for parent extraction. Can be replaced with one the extractParent* methods.
     """
-    return self.extractParentIndex()
+    return self.extractParentFitness()
 
   def extractParentIndex(self) -> Gene:
     """
@@ -32,8 +32,9 @@ class Population:
     """
 
     fitness = [g.fitness() for g in self.population]  # Can be cached, thus optimized
+    fitness = [f + 500 if f > float("-inf") else 0 for f in fitness] # Increment trick
 
-    return choices(self.population, weights=fitness).get(0)
+    return choices(self.population, weights=fitness)[0]
 
 
   def selectParents(self) -> List[Tuple[Gene]]:
