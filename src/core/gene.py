@@ -93,6 +93,9 @@ class Gene:
       self.FIRST_POINT,
       rodToPolar(self.rodEncoding)
     )
+
+    # Invalidate cached fitness
+    self.fitnessCached = float("-inf")
   
   def setGroundPlaneDistance(self, gpDist: float) -> None:
     self.groundPlaneDistance = gpDist
@@ -112,6 +115,9 @@ class Gene:
 
   def fitness(self) -> np.float16:
     freqHz = Config.ShapeConstraints.targetFreq
+
+    if self.fitnessCached > float("-inf"):
+      return self.fitnessCached
 
     try:
       with NecAnalysis(self, freqHz) as sim:
