@@ -1,8 +1,8 @@
 import logging
 import numpy as np
 from math import ceil, floor
-from random import randrange, sample
-from typing import List
+from random import randrange, sample, choice, choices
+from typing import List, Tuple
 from config import Config
 from core.gene import Gene
 
@@ -12,6 +12,43 @@ class Population:
     self.population = [Gene() for _ in range(Config.GeneticAlgoTuning.populationSize)]
     self.generationNumber = 0
     self.king = Gene()
+
+  def extractParent(self) -> Gene:
+    """
+    Interface method for parent extraction. Can be replaced with one the extractParent* methods.
+    """
+    return self.extractParentIndex()
+
+  def extractParentIndex(self) -> Gene:
+    """
+    Extracts a random parent from the population, with no regard to gene fitness.
+    """
+
+    return choice(self.population)
+  
+  def extractParentFitness(self) -> Gene:
+    """
+    Extracts a parent from the population. The likelihood of extraction is proportional to gene fitness.
+    """
+
+    fitness = [g.fitness() for g in self.population]  # Can be cached, thus optimized
+
+    return choices(self.population, weights=fitness).get(0)
+
+
+  def selectParents(self) -> List[Tuple[Gene]]:
+    """
+    Returns a list of parents, as tuples of (mother, father) of
+    half the dimension of the current population
+    """
+
+    pop_size = len(self.population)
+    parents_num = pop_size // 2
+    
+    parents = [
+      (self.extractParent(pop_size), self.extractParent(pop_size)) for _ in range(parents_num)
+    ]
+
 
   def generations(self) -> List[Gene]:
     for _ in range(Config.GeneticAlgoTuning.iterationsNumber):
@@ -61,10 +98,8 @@ class Population:
 
     for _ in range(newGenerationSize // 2):
       cutpointIdx = randrange(Config.GeneEncoding.segmentsNumber)
-      momGeneIdx = randrange(oldGenerationSize)
-      dadGeneIdx = randrange(oldGenerationSize)
-      momGene = self.population[momGeneIdx]
-      dadGene = self.population[dadGeneIdx]
+      momGene = self.extractParent()
+      dadGene = self.extractParent()
       newGene1 = Gene(
         momGene[:cutpointIdx] + dadGene[cutpointIdx:],
         np.average([dadGene.groundPlaneDistance, momGene.groundPlaneDistance])
