@@ -52,3 +52,8 @@ class Config:
     Config.GeneEncoding.maxAngle = d["gene_encoding"]["max_angle"]
     Config.GeneEncoding.maxSegmentLen = d["gene_encoding"]["max_segment_length"]
     Config.GeneEncoding.minSegmentLen = d["gene_encoding"]["min_segment_length"]
+
+# TODO: fix the default configuration
+
+with open("config.yaml") as f:
+  Config.loadYaml(f)
