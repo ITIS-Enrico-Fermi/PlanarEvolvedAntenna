@@ -8,8 +8,8 @@ from core.gene import Gene
 
 
 class Population:
-  def __init__(self):
-    self.population = [Gene() for _ in range(Config.GeneticAlgoTuning.populationSize)]
+  def __init__(self, pop_size: int = Config.GeneticAlgoTuning.populationSize):
+    self.population = [Gene() for _ in range(pop_size)]
     self.generationNumber = 0
     self.king = Gene()
 
@@ -53,7 +53,7 @@ class Population:
 
   def generations(self) -> List[Gene]:
     for _ in range(Config.GeneticAlgoTuning.iterationsNumber):
-      self.crossover()
+      self.generateOffspring()
       self.mutate()
       self.fight()
       
@@ -93,22 +93,29 @@ class Population:
     survivedGenesNumber = ceil(Config.GeneticAlgoTuning.turnoverRate * Config.GeneticAlgoTuning.populationSize)
     self.population = sorted(self.population, reverse=True)[ : survivedGenesNumber]
   
-  def crossover(self):
+  def crossover(self, mother: Gene, father: Gene):
+    cutpointIdx = randrange(Config.GeneEncoding.segmentsNumber)
+    newGene1 = Gene(
+      mother[:cutpointIdx] + father[cutpointIdx:],
+      np.average([father.groundPlaneDistance, mother.groundPlaneDistance])
+    )
+    newGene2 = Gene(
+      father[:cutpointIdx] + mother[cutpointIdx:],
+      np.average([father.groundPlaneDistance, mother.groundPlaneDistance])
+    )
+
+    return newGene1, newGene2
+
+  def generateOffspring(self):
     newGenerationSize = floor((1.0 - Config.GeneticAlgoTuning.turnoverRate) * Config.GeneticAlgoTuning.populationSize)
     oldGenerationSize = len(self.population)
 
     for _ in range(newGenerationSize // 2):
-      cutpointIdx = randrange(Config.GeneEncoding.segmentsNumber)
       momGene = self.extractParent()
       dadGene = self.extractParent()
-      newGene1 = Gene(
-        momGene[:cutpointIdx] + dadGene[cutpointIdx:],
-        np.average([dadGene.groundPlaneDistance, momGene.groundPlaneDistance])
-      )
-      newGene2 = Gene(
-        dadGene[:cutpointIdx] + momGene[cutpointIdx:],
-        np.average([dadGene.groundPlaneDistance, momGene.groundPlaneDistance])
-      )
+      
+      newGene1, newGene2 = self.crossover(momGene, dadGene)
+
       self.population.append(newGene1)
       self.population.append(newGene2)
     
