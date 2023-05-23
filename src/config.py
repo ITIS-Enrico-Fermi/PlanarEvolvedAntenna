@@ -17,6 +17,9 @@ class Config:
     cutPoints: int
     mutationRate: float
     turnoverRate: float
+    useNiches: bool
+    worldWidth: int
+    worldHeight: int
 
   class GeneEncoding:
     segmentsNumber: int
@@ -40,6 +43,9 @@ class Config:
     Config.GeneticAlgoTuning.cutPoints = d["genetic_algo_tuning"]["cut_points"]
     Config.GeneticAlgoTuning.mutationRate = d["genetic_algo_tuning"]["mutation_rate"]
     Config.GeneticAlgoTuning.turnoverRate = d["genetic_algo_tuning"]["turnover_rate"]
+    Config.GeneticAlgoTuning.useNiches = d["genetic_algo_tuning"]["use_niches"]
+    Config.GeneticAlgoTuning.worldWidth = d["genetic_algo_tuning"]["world_width"]
+    Config.GeneticAlgoTuning.worldHeight = d["genetic_algo_tuning"]["world_height"]
 
     Config.GeneEncoding.segmentsNumber = d["gene_encoding"]["segments_number"]
     Config.GeneEncoding.splineInterpolation = d["gene_encoding"]["spline_interpolation"]
