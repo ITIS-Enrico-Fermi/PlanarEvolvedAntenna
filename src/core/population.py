@@ -54,8 +54,6 @@ class Population:
   def generations(self) -> List[Gene]:
     for _ in range(Config.GeneticAlgoTuning.iterationsNumber):
       self.generateOffspring()
-      self.mutate()
-      self.fight()
       
       self.fitnessMean = np.mean([g.fitnessCached for g in self.population])
       self.fitnessStdDev = np.std([g.fitnessCached for g in self.population])
@@ -118,6 +116,9 @@ class Population:
 
       self.population.append(newGene1)
       self.population.append(newGene2)
+
+    self.mutate()
+    self.fight()
     
   def mutate(self):
     toMutateSize = ceil(Config.GeneticAlgoTuning.mutationRate * len(self.population))
