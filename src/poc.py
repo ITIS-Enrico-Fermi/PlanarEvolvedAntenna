@@ -10,11 +10,7 @@ from functools import partial
 
 CONFIG_FILENAME = "config.yaml"
 
-def simulationStep(
-  pop: Population,
-  doPlot: bool,
-  *_,
-  **kwargs) -> None:
+def simulationStep(pop: Population, doPlot: bool, *_, **kwargs) -> None:
   try:
     generation, epoch = next(pop.generations())
   except StopIteration:
