@@ -1,1 +1,1 @@
-__all__ = ["gene", "population"]
+__all__ = ["gene", "population", "niche"]
