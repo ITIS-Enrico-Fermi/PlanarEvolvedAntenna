@@ -3,6 +3,8 @@ from core.gene import Gene
 from config import Config
 from random import choices
 import numpy as np
+from operator import itemgetter
+from random import randrange
 
 class NichePopulation(Population):
     def __init__(self):
@@ -13,13 +15,12 @@ class NichePopulation(Population):
             Config.GeneticAlgoTuning.worldWidth
         )
 
-    def extractParents(self, kernel_i: int, kernel_j: int, kernel_dim: int):
+    def extractParents(self, kernel: np.matrix):
         """
         Extract parents for crossover from a kernel (submatrix of world).
         """
 
-        submatrix = self.world[kernel_i:kernel_i+kernel_dim, kernel_j:kernel_j+kernel_dim]
-        submatrix = submatrix.tolist()
+        submatrix = kernel.tolist()
 
         fitness = [g.fitness() for g in submatrix]
         fitness = [500 + f if f > float("-inf") else 0 for f in fitness]
@@ -28,17 +29,30 @@ class NichePopulation(Population):
     
     def generateOffspring(self):
         rows, cols = self.world.shape
-        kernel_dim = 3
+        
+        x, y = randrange(...)
 
-        for i in range(rows - kernel_dim):
-            for j in range(cols - kernel_dim):
-                mother, father = self.extractParentKernel(i, j)
-                childA, childB = self.crossover(mother, father)
+        submatrix = self.world[i:i+kernel_dim, j:j+kernel_dim]
 
-                # substitute neighbours with a lower fitness with children
+        mother, father = self.extractParents(submatrix)
+        childA, childB = self.crossover(mother, father)
+
+        for x, y, competitor in sorted(np.ndenumerate(submatrix), key=itemgetter(2)):
+            if(childA > competitor):
+                submatrix[x][y] = childA
+                break
+        
+        for x, y, competitor in sorted(np.ndenumerate(submatrix), key=itemgetter(2)):
+            if(childB > competitor):
+                submatrix[x][y] = childB
 
     def mutate():
         pass
 
     def fight():
         pass
+
+
+if __name__ == '__main__':
+    p = NichePopulation()
+    p.generateOffspring()
