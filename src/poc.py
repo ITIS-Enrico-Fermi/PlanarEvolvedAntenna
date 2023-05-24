@@ -44,7 +44,7 @@ def simulationStep(
 
 
 def buildSimulation(doPlot: bool, *_, **kwargs) -> Callable[[Population, bool], None]:
-  pop = Population()
+  pop = Population(Config.GeneticAlgoTuning.populationSize)
 
   signal.signal(signal.SIGINT, lambda *_: quit())
 

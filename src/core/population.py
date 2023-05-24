@@ -8,7 +8,7 @@ from core.gene import Gene
 
 
 class Population:
-  def __init__(self, pop_size: int = Config.GeneticAlgoTuning.populationSize):
+  def __init__(self, pop_size: int):
     self.population = [Gene() for _ in range(pop_size)]
     self.generationNumber = 0
     self.king = Gene()
