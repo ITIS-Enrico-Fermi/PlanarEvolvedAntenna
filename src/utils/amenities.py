@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.collections as mc
 from typing import List, Tuple, IO, Any
-from config import Config
+from core.config import Config
 from utils.geometry import *
 from rf.radiation import RadiationPattern
 from core.gene import Gene

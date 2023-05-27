@@ -1,6 +1,6 @@
 from core.population import Population
 from core.gene import Gene
-from config import Config
+from core.config import Config
 from random import choices
 import numpy as np
 

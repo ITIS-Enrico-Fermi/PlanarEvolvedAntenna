@@ -1,7 +1,7 @@
 import logging
 import numpy as np
 from necpp import *
-from config import Config
+from core.config import Config
 from utils.geometry import *
 from rf.radiation import RadiationPattern, RpCardEvaluationInput
 from rf.nec_analysis import NecAnalysis

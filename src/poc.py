@@ -4,7 +4,7 @@ from typing import Callable
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from utils.amenities import plotPathAndRad, saveSvg
-from config import Config
+from core.config import Config
 from core.population import Population
 from functools import partial
 

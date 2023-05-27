@@ -3,7 +3,7 @@ import numpy as np
 from math import ceil, floor
 from random import randrange, sample, choice, choices
 from typing import List, Tuple
-from config import Config
+from core.config import Config
 from core.gene import Gene
 
 
