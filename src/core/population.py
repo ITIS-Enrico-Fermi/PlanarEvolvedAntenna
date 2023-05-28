@@ -51,7 +51,7 @@ class Population:
     ]
 
 
-  def generations(self) -> List[Gene]:
+  def generations(self) -> Tuple[List[Gene], int]:
     for _ in range(Config.GeneticAlgoTuning.iterationsNumber):
       self.generateOffspring()
       self.mutate()
