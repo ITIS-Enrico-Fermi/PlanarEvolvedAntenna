@@ -21,6 +21,9 @@ class NichePopulation(Population):
     def populationSet(self) -> np.ndarray:
         # TODO: unify this property with superclass population attribute
         return self.world.reshape(self.world.size)
+    
+    def nicheToSet(self, niche: np.ndarray) -> np.ndarray:
+        return niche.reshape(niche.size)
 
     def extractParents(self, neigh: np.matrix):
         """
@@ -34,31 +37,32 @@ class NichePopulation(Population):
 
         return choices(neigh, weights=fitness, k=2)
     
-    def generateOffspring(self):
+    def sampleNiche(self) -> np.ndarray:
         rows, cols = self.world.shape
-        
+
         x = randrange(rows)
         y = randrange(cols)
 
-        neigh = self.world.take(
+        return self.world.take(
             [range(x-1, x+2),
             range(y-1, y+2)],
             mode='wrap'                       
         )
 
-        mother, father = self.extractParents(neigh)
+    def generateOffspring(self, niche: np.ndarray):
+        mother, father = self.extractParents(niche)
         childA, childB = self.crossover(mother, father)
 
         if not childA.isValid():
             return
 
-        (x, y), weakest = min(np.ndenumerate(neigh), key=itemgetter(1))
+        (x, y), weakest = min(np.ndenumerate(niche), key=itemgetter(1))
         if childA > weakest:
-            neigh[x][y] = childA
+            niche[x][y] = childA
             print(f"Sub ({x}, {y}) with child A with fitness: {childA}")
         
-    def mutate(self):
-        for gene in self.populationSet():
+    def mutate(self, niche):
+        for gene in self.nicheToSet(niche):
             if random() > Config.GeneticAlgoTuning.mutationRate:
                 continue    # Because of uniform probability
 
@@ -98,8 +102,9 @@ class NichePopulation(Population):
 
     def generations(self) -> List[Gene]:
         for _ in range(Config.GeneticAlgoTuning.iterationsNumber):
-            self.generateOffspring()
-            self.mutate()
+            niche = self.sampleNiche()
+            self.generateOffspring(niche)
+            self.mutate(niche)
 
             self.fitnessMean = np.mean([g.fitness() for g in self.populationSet()])
             self.fitnessStdDev = np.std([g.fitness() for g in self.populationSet()])
