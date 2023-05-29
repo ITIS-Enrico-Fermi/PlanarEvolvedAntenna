@@ -41,7 +41,11 @@ class NichePopulation(Population):
         x = randrange(rows)
         y = randrange(cols)
 
-        neigh = self.world[x-1:x+2, y-1:y+2]
+        neigh = self.world.take(
+            [range(x-1, x+2),
+            range(y-1, y+2)],
+            mode='wrap'                       
+        )
 
         mother, father = self.extractParents(neigh)
         childA, childB = self.crossover(mother, father)
