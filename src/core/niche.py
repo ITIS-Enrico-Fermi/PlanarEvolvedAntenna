@@ -2,10 +2,9 @@ from typing import List
 from core.population import Population
 from core.gene import Gene
 from config import Config
-from random import choices
+from random import choices, randrange, random
 import numpy as np
 from operator import itemgetter
-from random import randrange
 import logging
 
 class NichePopulation(Population):
@@ -50,8 +49,6 @@ class NichePopulation(Population):
         mother, father = self.extractParents(neigh)
         childA, childB = self.crossover(mother, father)
 
-        self.mutate(childA)
-
         if not childA.isValid():
             return
 
@@ -60,36 +57,40 @@ class NichePopulation(Population):
             neigh[x][y] = childA
             print(f"Sub ({x}, {y}) with child A with fitness: {childA}")
         
-    def mutate(self, gene: Gene):
-        mutationAngles = (np.random.rand(Config.GeneEncoding.segmentsNumber) - 0.5) \
-        * Config.GeneEncoding.maxAngle
+    def mutate(self):
+        for gene in self.populationSet():
+            if random() > Config.GeneticAlgoTuning.mutationRate:
+                continue    # Because of uniform probability
 
-        mutationLengths = np.random.uniform(
-            low = - (Config.GeneEncoding.minSegmentLen + Config.GeneEncoding.maxSegmentLen) / 2,
-            high = (Config.GeneEncoding.minSegmentLen + Config.GeneEncoding.maxSegmentLen) / 2,
-            size = Config.GeneEncoding.segmentsNumber
-        )
+            mutationAngles = (np.random.rand(Config.GeneEncoding.segmentsNumber) - 0.5) \
+            * Config.GeneEncoding.maxAngle
 
-        mutationGpDistance = np.random.uniform(
-            low = Config.ShapeConstraints.groundPlaneDistanceMin,
-            high = Config.ShapeConstraints.groundPlaneDistanceMax,
-            size = 1
-        )[0]
+            mutationLengths = np.random.uniform(
+                low = - (Config.GeneEncoding.minSegmentLen + Config.GeneEncoding.maxSegmentLen) / 2,
+                high = (Config.GeneEncoding.minSegmentLen + Config.GeneEncoding.maxSegmentLen) / 2,
+                size = Config.GeneEncoding.segmentsNumber
+            )
 
-        newAngles = np.clip(
-            gene.getAngleArray() + mutationAngles,
-            - Config.GeneEncoding.maxAngle / 2,
-            + Config.GeneEncoding.maxAngle / 2
-        )
+            mutationGpDistance = np.random.uniform(
+                low = Config.ShapeConstraints.groundPlaneDistanceMin,
+                high = Config.ShapeConstraints.groundPlaneDistanceMax,
+                size = 1
+            )[0]
 
-        newLengths = np.clip(
-            gene.getLengthArray() + mutationLengths,
-            Config.GeneEncoding.minSegmentLen,
-            Config.GeneEncoding.maxSegmentLen
-        )
+            newAngles = np.clip(
+                gene.getAngleArray() + mutationAngles,
+                - Config.GeneEncoding.maxAngle / 2,
+                + Config.GeneEncoding.maxAngle / 2
+            )
 
-        gene.setEncoding(newAngles, newLengths)
-        gene.setGroundPlaneDistance(mutationGpDistance)
+            newLengths = np.clip(
+                gene.getLengthArray() + mutationLengths,
+                Config.GeneEncoding.minSegmentLen,
+                Config.GeneEncoding.maxSegmentLen
+            )
+
+            gene.setEncoding(newAngles, newLengths)
+            gene.setGroundPlaneDistance(mutationGpDistance)
             
 
     def fight():
@@ -98,6 +99,7 @@ class NichePopulation(Population):
     def generations(self) -> List[Gene]:
         for _ in range(Config.GeneticAlgoTuning.iterationsNumber):
             self.generateOffspring()
+            self.mutate()
 
             self.fitnessMean = np.mean([g.fitness() for g in self.populationSet()])
             self.fitnessStdDev = np.std([g.fitness() for g in self.populationSet()])
