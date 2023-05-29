@@ -3,55 +3,19 @@ import signal, os
 from typing import Callable
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
+from rf.radiation import RadiationPattern
+from services.plotters import *
+from services.persistence import *
 from utils.amenities import plotPathAndRad, saveSvg
 from core.config import Config
 from core.population import Population
+from core.simulation import Simulation
 from functools import partial
 
 CONFIG_FILENAME = "config.yaml"
 
-def simulationStep(
-  pop: Population,
-  doPlot: bool,
-  *_,
-  **kwargs) -> None:
-  try:
-    generation, epoch = next(pop.generations())
-  except StopIteration:
-    quit()
-
-  logging.info(f"Epoch: {epoch}")
-  logging.debug(generation)
-  logging.info(f"Best gene (fitness={generation[0].fitness():.2f}):\n{generation[0]}")
-
-  if doPlot:
-    plotPathAndRad(
-      title = f"Epoch: {epoch} -\n"
-        f"Best fitness: {generation[0].fitness():.2f} -\n"
-        f"Mean fitness: {pop.fitnessMean:.2f} -\n"
-        f"Sd fitness: {pop.fitnessStdDev:.2f}",
-      polychain = generation[0].getCartesianCoords(),  # Plot only best performing individual
-      radiationSagittal = generation[0].getRadiationPatternSagittal(),
-      radiationFrontal = generation[0].getRadiationPatternFrontal(),
-      groundPlaneDistance = generation[0].groundPlaneDistance,
-      axes = (kwargs.pop("shapeAxes"), kwargs.pop("radiationAxesSag"), kwargs.pop("radiationAxesFront"))
-    )
-  
-  outputDirectory = kwargs.pop("outputDirectory")
-  if outputDirectory is not None:
-    with open(os.path.join(outputDirectory, f"gen{epoch}.svg"), "w") as outFile:
-      saveSvg(outFile, generation, kwargs.pop("withBoundaries"))
-
-
-def buildSimulation(doPlot: bool, *_, **kwargs) -> Callable[[Population, bool], None]:
-  pop = Population()
-
-  signal.signal(signal.SIGINT, lambda *_: quit())
-
-  return partial(simulationStep, pop, doPlot, **kwargs)
-
-
 def main(doPlot: bool, outdir: str, withBoundaries: bool):
+  signal.signal(signal.SIGINT, lambda *_: quit())
 
   logging.basicConfig(
     level=logging.INFO,
@@ -61,27 +25,37 @@ def main(doPlot: bool, outdir: str, withBoundaries: bool):
 
   with open(CONFIG_FILENAME, "r") as f:
     Config.loadYaml(f)
-    
-  if doPlot:
-    fig = plt.figure()
-    shape = fig.add_subplot(1, 3, 1)
-    radPatternSag = fig.add_subplot(1, 3, 2, projection='polar')
-    radPatternFront = fig.add_subplot(1, 3, 3, projection='polar')
-    simulation = buildSimulation(
-      doPlot,
-      shapeAxes = shape,
-      radiationAxesSag = radPatternSag,
-      radiationAxesFront = radPatternFront,
-      outputDirectory = outdir,
-      withBoundaries = withBoundaries
-    )
-    anim = animation.FuncAnimation(fig, simulation, interval=10, cache_frame_data=False)
-    plt.show()
-    
+
+  if outdir is None:
+    persistenceServiceClass = StubPlotterService
   else:
-    simulation = buildSimulation(doPlot, outputDirectory = outdir, withBoundaries = withBoundaries)
-    while True:
-      simulation()
+    if withBoundaries:
+      persistenceServiceClass = MiniatureWithBoundariesPersistenceService
+    else:
+      persistenceServiceClass = MiniaturePersistenceService
+  
+  persistenceService = persistenceServiceClass(outdir)
+  
+  fig = plt.figure()
+  shape = fig.add_subplot(1, 3, 1)
+  radPatternSag = fig.add_subplot(1, 3, 2, projection='polar')
+  radPatternFront = fig.add_subplot(1, 3, 3, projection='polar')
+  pop = Population()
+  sim = Simulation(pop) \
+    .withService(PlanarShapePlotter(shape)) \
+    .withService(RadiationPatternPlotter(radPatternFront, Gene.getRadiationPatternFrontal)) \
+    .withService(RadiationPatternPlotter(radPatternSag, Gene.getRadiationPatternSagittal)) \
+    .withService(persistenceService)
+
+  try:
+    if doPlot:
+      anim = animation.FuncAnimation(fig, sim.run, interval = 10, cache_frame_data = False)
+      plt.show()
+    else:
+      while True:
+        sim.run()
+  except StopIteration:
+    quit()
 
 
 if __name__ == "__main__":
