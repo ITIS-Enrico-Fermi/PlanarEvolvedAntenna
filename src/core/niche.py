@@ -6,6 +6,7 @@ from random import choices, randrange, random
 import numpy as np
 from operator import itemgetter
 import logging
+from utils.geometry import polychainToCartesian, cartesianToPolychain
 
 class NichePopulation(Population):
     def __init__(self, mutationRate: float):
@@ -66,34 +67,30 @@ class NichePopulation(Population):
             if random() > Config.GeneticAlgoTuning.mutationRate:
                 continue    # Because of uniform probability
 
-            mutationAngles = (np.random.rand(Config.GeneEncoding.segmentsNumber) - 0.5) \
-            * Config.GeneEncoding.maxAngle
-
-            mutationLengths = np.random.uniform(
-                low = - (Config.GeneEncoding.minSegmentLen + Config.GeneEncoding.maxSegmentLen) / 2,
-                high = (Config.GeneEncoding.minSegmentLen + Config.GeneEncoding.maxSegmentLen) / 2,
-                size = Config.GeneEncoding.segmentsNumber
-            )
-
             mutationGpDistance = np.random.uniform(
                 low = Config.ShapeConstraints.groundPlaneDistanceMin,
                 high = Config.ShapeConstraints.groundPlaneDistanceMax,
                 size = 1
             )[0]
 
-            newAngles = np.clip(
-                gene.getAngleArray() + mutationAngles,
-                - Config.GeneEncoding.maxAngle / 2,
-                + Config.GeneEncoding.maxAngle / 2
+            xMutation = np.random.uniform(
+                low = - (Config.GeneEncoding.minSegmentLen + Config.GeneEncoding.maxSegmentLen) / 2,
+                high = (Config.GeneEncoding.minSegmentLen + Config.GeneEncoding.maxSegmentLen) / 2,
+                size = Config.GeneEncoding.segmentsNumber + 1
             )
 
-            newLengths = np.clip(
-                gene.getLengthArray() + mutationLengths,
-                Config.GeneEncoding.minSegmentLen,
-                Config.GeneEncoding.maxSegmentLen
+            yMutation = np.random.uniform(
+                low = - (Config.GeneEncoding.minSegmentLen + Config.GeneEncoding.maxSegmentLen) / 2,
+                high = (Config.GeneEncoding.minSegmentLen + Config.GeneEncoding.maxSegmentLen) / 2,
+                size = Config.GeneEncoding.segmentsNumber + 1
             )
 
-            gene.setEncoding(newAngles, newLengths)
+            newEncoding = gene.getCartesianCoords()
+            newEncoding = polychainToCartesian(newEncoding)
+            newEncoding += [xMutation, yMutation]
+            newEncoding = cartesianToPolychain(newEncoding)
+
+            gene.setEncoding(newEncoding)
             gene.setGroundPlaneDistance(mutationGpDistance)
             
 

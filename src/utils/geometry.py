@@ -48,6 +48,14 @@ def cartesianToPolychain(coords: List[Tuple], startPoint: Point = Point(0, 0)) -
 
     return chain
 
+def polychainToCartesian(chain: Polychain) -> List[Point]:
+    coords = list()
+    for s in chain:
+        coords.append(s.start)
+    coords.append(chain[-1].end)
+
+    return coords
+
 def rodToPolar(rodCoords: List[PolarCoord]) -> List[PolarCoord]:
     polarCoords = [rodCoords[0]]
 

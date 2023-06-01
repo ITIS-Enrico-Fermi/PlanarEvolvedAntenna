@@ -12,7 +12,7 @@ class Gene:
     STANDARD_DEVIATION_K = 0
     # STANDARD_DEVIATION_K = -1    # Penalize high sd
 
-    def __init__(self, providedGenotype: Polychain = None):
+    def __init__(self, providedGenotype: Polychain = None, gndDistance: float = 1.0):
         self.FIRST_POINT = Point(- Config.ShapeConstraints.outerDiam / 2, 0)
 
         self.radiationPatternSagittal = None
@@ -29,6 +29,7 @@ class Gene:
 
         if providedGenotype:
             self.polychainEncoding = providedGenotype
+            self.groundPlaneDistance = gndDistance
 
         else:
             x = np.cumsum(np.random.uniform(
@@ -53,7 +54,7 @@ class Gene:
         return f"<Gene {self.serial} {repr(self.polychainEncoding)}>"
     
     def __getitem__(self, itemIdx):
-        return self.rodEncoding[itemIdx]
+        return self.polychainEncoding[itemIdx]
     
     def getPolarCoords(self) -> List[PolarCoord]:
         return self.rodEncoding
@@ -77,14 +78,8 @@ class Gene:
     def getRadiationPatternFrontal(self) -> RadiationPattern:
         return self.radiationPatternFrontal
     
-    def setEncoding(self, angles: List[float], lengths: List[float]) -> None:
-        self.rodEncoding = list(zip(angles, lengths))
-        self.rodEncoding = [PolarCoord(a, l) for (a, l) in self.rodEncoding]
-
-        self.polychainEncoding = polarToPolychain(
-            self.FIRST_POINT,
-            rodToPolar(self.rodEncoding)
-        )
+    def setEncoding(self, chain: Polychain):
+        self.polychainEncoding = chain
 
         # Invalidate cached fitness
         self.fitnessCached = float("-inf")
