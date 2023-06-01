@@ -32,11 +32,21 @@ class Segment:
         self.end = end
     
     def __repr__(self) -> str:
-        return f"<{self.start} - {self.end}>"
+        return f"<{self.start}, {self.end}>"
     
     def toList(self) -> List[Tuple[float, float]]:
         return [(self.start.x, self.start.y), (self.end.x, self.end.y)]
+    
+Polychain = List[Segment]
 
+def cartesianToPolychain(coords: List[Tuple], startPoint: Point = Point(0, 0)) -> Polychain:
+    chain = list()
+    prev_pt = startPoint
+    for pt in coords:
+        chain.append(Segment(prev_pt, pt))
+        prev_pt = pt
+
+    return chain
 
 def rodToPolar(rodCoords: List[PolarCoord]) -> List[PolarCoord]:
     polarCoords = [rodCoords[0]]

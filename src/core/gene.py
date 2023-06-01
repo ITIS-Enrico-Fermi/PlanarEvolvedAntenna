@@ -12,7 +12,7 @@ class Gene:
     STANDARD_DEVIATION_K = 0
     # STANDARD_DEVIATION_K = -1    # Penalize high sd
 
-    def __init__(self, rodEncodedGene: List[PolarCoord] = None, groundPlaneDist: float = 1):
+    def __init__(self, providedGenotype: Polychain = None):
         self.FIRST_POINT = Point(- Config.ShapeConstraints.outerDiam / 2, 0)
 
         self.radiationPatternSagittal = None
@@ -27,38 +27,30 @@ class Gene:
         self.serial = Gene.globalSerial
         Gene.globalSerial += 1
 
-        if (rodEncodedGene is not None):
-            self.rodEncoding = rodEncodedGene
-            self.polychainEncoding = polarToPolychain(
-                self.FIRST_POINT,
-                rodToPolar(self.rodEncoding)
+        if providedGenotype:
+            self.polychainEncoding = providedGenotype
+
+        else:
+            x = np.cumsum(np.random.uniform(
+                low = Config.GeneEncoding.minSegmentLen,
+                high = Config.GeneEncoding.maxSegmentLen,
+                size = Config.GeneEncoding.segmentsNumber
+            ))
+            y = np.cumsum(np.random.uniform(
+                low = Config.GeneEncoding.minSegmentLen,
+                high = Config.GeneEncoding.maxSegmentLen,
+                size = Config.GeneEncoding.segmentsNumber
+            ))
+
+            self.polychainEncoding = cartesianToPolychain(
+                [Point(px, py) for px, py in zip(x, y)]
             )
-            self.groundPlaneDistance = groundPlaneDist
-            return
-
-        revolutionAngles = (np.random.rand(Config.GeneEncoding.segmentsNumber) - 0.5) * \
-            Config.GeneEncoding.maxAngle
-        
-        segmentLengths = np.random.uniform(
-            low = Config.GeneEncoding.minSegmentLen,
-            high = Config.GeneEncoding.maxSegmentLen,
-            size = Config.GeneEncoding.segmentsNumber)
-
-        self.setEncoding(revolutionAngles, segmentLengths)
 
     def __lt__(self, other) -> bool:
         return self.fitness() < other.fitness()
     
     def __repr__(self) -> str:
-        res = f"GeneID: {self.serial} <"
-
-        lastItemIdx = len(self.rodEncoding) - 1
-
-        for i in range(lastItemIdx):
-            res += f"{self.rodEncoding[i].angle:.1f} deg - {self.rodEncoding[i].distance:.1f} mm - "
-        res += f"{self.rodEncoding[lastItemIdx].angle:.1f} deg - {self.rodEncoding[lastItemIdx].distance:.1f} mm>"
-
-        return res
+        return f"<Gene {self.serial} {repr(self.polychainEncoding)}>"
     
     def __getitem__(self, itemIdx):
         return self.rodEncoding[itemIdx]
