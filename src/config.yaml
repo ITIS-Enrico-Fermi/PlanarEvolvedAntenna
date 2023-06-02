@@ -11,7 +11,7 @@ genetic_algo_tuning:
   population_size: 300
   turnover_rate: 0.5  # rate of new individuals generated from crossover
   iterations_number: 400
-  mutation_rate: 0.5  # rate of individuals that will be mutated at each iteration
+  mutation_rate: 0.1  # rate of individuals that will be mutated at each iteration
   cut_points: 1
   use_niches: true
   world_width: 20

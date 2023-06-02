@@ -55,8 +55,23 @@ class FitnessPlotter(IPlotterService):
   """
   Fitness max, mean and standard deviation plotter
   """
+  def __init__(self, axes: Axes):
+    self.axes = axes
+    self.meanValues = []
+    self.sdValues = []
+
   def plot(self, population: Population) -> None:
-    ...
+    self.meanValues.append(population.fitnessMean)
+    self.sdValues.append(population.fitnessStdDev)
+    time = list(range(population.generationNumber))
+
+    self.axes.clear()
+    self.axes.set_title("Fitness")
+    self.axes.grid(True)
+    self.axes.plot(
+      time, self.meanValues,
+      time, self.sdValues
+    )
 
 class HammingDistancePlotter(IPlotterService):
   """
@@ -69,5 +84,17 @@ class KilledGenesPlotter(IPlotterService):
   """
   Number of killed  genes plotter
   """
+  def __init__(self, axes: Axes):
+    self.axes = axes
+    self.killedGenes = []
+
   def plot(self, population: Population) -> None:
-    ...
+    self.killedGenes.append(population.killedGenesRatio)
+    time = list(range(population.generationNumber))
+
+    self.axes.clear()
+    self.axes.set_title("Killed genes ratio")
+    self.axes.grid(True)
+    self.axes.plot(
+      time, self.killedGenes,
+    )

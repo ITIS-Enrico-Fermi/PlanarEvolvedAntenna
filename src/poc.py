@@ -36,16 +36,24 @@ def main(doPlot: bool, outdir: str, withBoundaries: bool):
   
   persistenceService = persistenceServiceClass(outdir)
   
+  PLOT_ROWS = 2
+  PLOT_COLS = 3
   fig = plt.figure()
-  shape = fig.add_subplot(1, 3, 1)
-  radPatternSag = fig.add_subplot(1, 3, 2, projection='polar')
-  radPatternFront = fig.add_subplot(1, 3, 3, projection='polar')
+  shape = fig.add_subplot(PLOT_ROWS, PLOT_COLS, 1)
+  radPatternSag = fig.add_subplot(PLOT_ROWS, PLOT_COLS, 2, projection='polar')
+  radPatternFront = fig.add_subplot(PLOT_ROWS, PLOT_COLS, 3, projection='polar')
+  fitnessGraph = fig.add_subplot(PLOT_ROWS, PLOT_COLS, 4)
+  killedGraph = fig.add_subplot(PLOT_ROWS, PLOT_COLS, 5)
+  fig.tight_layout()
+  
   pop = Population()
   sim = Simulation(pop) \
     .withService(PlanarShapePlotter(shape)) \
     .withService(RadiationPatternPlotter(radPatternFront, Gene.getRadiationPatternFrontal)) \
     .withService(RadiationPatternPlotter(radPatternSag, Gene.getRadiationPatternSagittal)) \
-    .withService(persistenceService)
+    .withService(persistenceService) \
+    .withService(FitnessPlotter(fitnessGraph)) \
+    .withService(KilledGenesPlotter(killedGraph))
 
   try:
     if doPlot:

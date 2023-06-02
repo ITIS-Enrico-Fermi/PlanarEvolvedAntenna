@@ -88,7 +88,9 @@ class Population:
       self.individuals
     ))
 
-    logging.warning(f"Killed {oldGenerationSize - len(self.individuals)} ({(oldGenerationSize - len(self.individuals)) / oldGenerationSize * 100:.1f}%) genes")
+    self.killedGenes = oldGenerationSize - len(self.individuals)
+    self.killedGenesRatio = self.killedGenes / oldGenerationSize * 100
+    logging.warning(f"Killed {self.killedGenes} ({self.killedGenesRatio:.1f}%) genes")
 
     survivedGenesNumber = ceil(Config.GeneticAlgoTuning.turnoverRate * Config.GeneticAlgoTuning.populationSize)
     self.individuals = sorted(self.individuals, reverse=True)[ : survivedGenesNumber]
