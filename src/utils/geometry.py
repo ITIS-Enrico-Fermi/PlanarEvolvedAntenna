@@ -39,12 +39,13 @@ class Segment:
     
 Polychain = List[Segment]
 
-def cartesianToPolychain(coords: List[Tuple], startPoint: Point = Point(0, 0)) -> Polychain:
+def cartesianToPolychain(coords: List[Tuple]) -> Polychain:
     chain = list()
-    prev_pt = startPoint
-    for pt in coords:
-        chain.append(Segment(prev_pt, pt))
-        prev_pt = pt
+    points = [Point(x, y) for x, y in coords]
+    prev_pt = points[0]
+    for new_pt in points[1:]:
+        chain.append(Segment(prev_pt, new_pt))
+        prev_pt = new_pt
 
     return chain
 
@@ -79,10 +80,10 @@ def polarToPolychain(startPoint: Point, polarCoords: List[PolarCoord]) -> List[S
     
     return segments
 
-def polarToCart(polarCoord: PolarCoord) -> Point:
-    return Point(
-        np.cos(polarCoord.angle) * polarCoord.distance,
-        np.sin(polarCoord.angle) * polarCoord.distance
+def polarToCart(distance: float, angle: float) -> Tuple:
+    return (
+        np.cos(angle) * distance,
+        np.sin(angle) * distance
     )
 
 def isSelfIntersectingPath(polychain: List[Segment]) -> bool:
@@ -143,3 +144,12 @@ def doesPathIntersectCircle(polychain: List[Segment], center: Point, radius: flo
             return True
     
     return False
+
+def randomPointsInsideCircle(numberOfPoints: int, circleRadius: float) -> List[Tuple]:
+    rhos = np.random.uniform(0, circleRadius, numberOfPoints) # Points distance from origin in polar coordinates
+    thetas = np.random.uniform(0, 2*np.pi, numberOfPoints)  # Points angles in polar coordinates
+
+    points = [polarToCart(r, t) for r, t in zip(rhos, thetas)]
+    points = [(x+circleRadius, y+circleRadius) for x,y in points]
+
+    return points

@@ -11,7 +11,7 @@ class NecAnalysis:
     def __enter__(self):
         self.context = nec_create()
         
-        for segment in self.gene.getCartesianCoords():
+        for segment in self.gene.getPolychain():
             assert nec_wire(
                 self.context,
                 self.gene.globalSerial,    # tag ID

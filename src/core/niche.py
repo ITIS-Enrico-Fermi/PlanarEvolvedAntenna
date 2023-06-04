@@ -34,7 +34,9 @@ class NichePopulation(Population):
         neigh = neigh.reshape(neigh.size)
 
         fitness = [g.fitness() for g in neigh]
-        fitness = [100 + f if f > float("-inf") else 0 for f in fitness]
+        fitness = [10000 + f if f > float("-inf") else 0 for f in fitness]
+
+        print("Fitness: ", fitness)
 
         return choices(neigh, weights=fitness, k=2)
     
