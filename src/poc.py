@@ -3,55 +3,22 @@ import signal, os
 from typing import Callable
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
+from rf.radiation import RadiationPattern
+from services.plotters import *
+from services.persistence import *
+from services.statistics import *
 from utils.amenities import plotPathAndRad, saveSvg
 from core.config import Config
 from core.population import Population
+from core.simulation import Simulation
+from multiprocessing import Pool
 from functools import partial
+from scipy.io import savemat
 
 CONFIG_FILENAME = "config.yaml"
 
-def simulationStep(
-  pop: Population,
-  doPlot: bool,
-  *_,
-  **kwargs) -> None:
-  try:
-    generation, epoch = next(pop.generations())
-  except StopIteration:
-    quit()
-
-  logging.info(f"Epoch: {epoch}")
-  logging.debug(generation)
-  logging.info(f"Best gene (fitness={generation[0].fitness():.2f}):\n{generation[0]}")
-
-  if doPlot:
-    plotPathAndRad(
-      title = f"Epoch: {epoch} -\n"
-        f"Best fitness: {generation[0].fitness():.2f} -\n"
-        f"Mean fitness: {pop.fitnessMean:.2f} -\n"
-        f"Sd fitness: {pop.fitnessStdDev:.2f}",
-      polychain = generation[0].getCartesianCoords(),  # Plot only best performing individual
-      radiationSagittal = generation[0].getRadiationPatternSagittal(),
-      radiationFrontal = generation[0].getRadiationPatternFrontal(),
-      groundPlaneDistance = generation[0].groundPlaneDistance,
-      axes = (kwargs.pop("shapeAxes"), kwargs.pop("radiationAxesSag"), kwargs.pop("radiationAxesFront"))
-    )
-  
-  outputDirectory = kwargs.pop("outputDirectory")
-  if outputDirectory is not None:
-    with open(os.path.join(outputDirectory, f"gen{epoch}.svg"), "w") as outFile:
-      saveSvg(outFile, generation, kwargs.pop("withBoundaries"))
-
-
-def buildSimulation(doPlot: bool, *_, **kwargs) -> Callable[[Population, bool], None]:
-  pop = Population()
-
+def main(doPlot: bool, outdir: str, withBoundaries: bool, statService: IStatService, instanceNumber: int = 0):
   signal.signal(signal.SIGINT, lambda *_: quit())
-
-  return partial(simulationStep, pop, doPlot, **kwargs)
-
-
-def main(doPlot: bool, outdir: str, withBoundaries: bool):
 
   logging.basicConfig(
     level=logging.INFO,
@@ -61,27 +28,53 @@ def main(doPlot: bool, outdir: str, withBoundaries: bool):
 
   with open(CONFIG_FILENAME, "r") as f:
     Config.loadYaml(f)
-    
-  if doPlot:
-    fig = plt.figure()
-    shape = fig.add_subplot(1, 3, 1)
-    radPatternSag = fig.add_subplot(1, 3, 2, projection='polar')
-    radPatternFront = fig.add_subplot(1, 3, 3, projection='polar')
-    simulation = buildSimulation(
-      doPlot,
-      shapeAxes = shape,
-      radiationAxesSag = radPatternSag,
-      radiationAxesFront = radPatternFront,
-      outputDirectory = outdir,
-      withBoundaries = withBoundaries
-    )
-    anim = animation.FuncAnimation(fig, simulation, interval=10, cache_frame_data=False)
-    plt.show()
-    
+
+  if outdir is None:
+    persistenceServiceClass = StubPlotterService
   else:
-    simulation = buildSimulation(doPlot, outputDirectory = outdir, withBoundaries = withBoundaries)
-    while True:
-      simulation()
+    if withBoundaries:
+      persistenceServiceClass = MiniatureWithBoundariesPersistenceService
+    else:
+      persistenceServiceClass = MiniaturePersistenceService
+  
+  persistenceService = persistenceServiceClass(outdir)
+  
+  PLOT_ROWS = 2
+  PLOT_COLS = 3
+  fig = plt.figure(f"Simulation {instanceNumber}")
+  shape = fig.add_subplot(PLOT_ROWS, PLOT_COLS, 1)
+  radPatternSag = fig.add_subplot(PLOT_ROWS, PLOT_COLS, 2, projection='polar')
+  radPatternFront = fig.add_subplot(PLOT_ROWS, PLOT_COLS, 3, projection='polar')
+  fitnessGraph = fig.add_subplot(PLOT_ROWS, PLOT_COLS, 4)
+  killedGraph = fig.add_subplot(PLOT_ROWS, PLOT_COLS, 5)
+  distanceGraph = fig.add_subplot(PLOT_ROWS, PLOT_COLS, 6)
+  fig.tight_layout()
+
+  statService.withGraphers(
+    FitnessPlotter(fitnessGraph),
+    KilledGenesPlotter(killedGraph),
+    EuclideanDistancePlotter(distanceGraph)
+  )
+
+  pop = Population()
+  sim = Simulation(pop) \
+    .withService(PlanarShapePlotter(shape)) \
+    .withService(RadiationPatternPlotter(radPatternFront, Gene.getRadiationPatternFrontal)) \
+    .withService(RadiationPatternPlotter(radPatternSag, Gene.getRadiationPatternSagittal)) \
+    .withService(persistenceService) \
+    .withService(statService)
+
+  try:
+    if doPlot:
+      anim = animation.FuncAnimation(fig, sim.run, interval = 10, cache_frame_data = False)
+      plt.show()
+    else:
+      while True:
+        sim.run()
+  except StopIteration:
+    return statService.valuesDict
+  
+  return statService.valuesDict
 
 
 if __name__ == "__main__":
@@ -104,6 +97,30 @@ if __name__ == "__main__":
     default=False, action="store_true"
   )
 
+  parser.add_argument(
+    "-bm", "--benchmark-instances", help="Number of benchmark's paralell simulations",
+    type=int, default=1
+  )
+
   args = parser.parse_args()
 
-  main(args.plot, args.outdir, args.with_boundaries)
+  statServices = [StatService(join("results", f"stats{i}.mat")) for i in range(args.benchmark_instances)]
+
+  parallelMain = partial(main, args.plot, args.outdir, args.with_boundaries)
+  with Pool(args.benchmark_instances) as p:
+    statsDicts = p.starmap(parallelMain, [(statService, i) for i, statService in enumerate(statServices)])
+
+  outStats = {}
+  minLength = min([len(d['timeline']) for d in statsDicts])
+  for statName in statsDicts[0].keys():
+    rawValues = None
+
+    for d in statsDicts:
+      if rawValues is not None:
+        rawValues = np.vstack((rawValues, d[statName][:minLength]))
+      else:
+        rawValues = np.array(d[statName][:minLength])
+    
+    outStats[statName] = np.mean(rawValues, axis=0)
+
+  savemat(join("results", "aggregate_stats.mat"), outStats)

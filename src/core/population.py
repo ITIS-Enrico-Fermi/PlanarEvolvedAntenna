@@ -9,8 +9,9 @@ from core.gene import Gene
 
 class Population:
   def __init__(self, pop_size: int = Config.GeneticAlgoTuning.populationSize):
-    self.population = [Gene() for _ in range(pop_size)]
+    self.individuals = [Gene() for _ in range(pop_size)]
     self.generationNumber = 0
+    self.newbornsCounter = 0
     self.king = Gene()
 
   def extractParent(self) -> Gene:
@@ -24,17 +25,17 @@ class Population:
     Extracts a random parent from the population, with no regard to gene fitness.
     """
 
-    return choice(self.population)
+    return choice(self.individuals)
   
   def extractParentFitness(self) -> Gene:
     """
     Extracts a parent from the population. The likelihood of extraction is proportional to gene fitness.
     """
 
-    fitness = [g.fitness() for g in self.population]  # Can be cached, thus optimized
+    fitness = [g.fitness() for g in self.individuals]  # Can be cached, thus optimized
     fitness = [f + 500 if f > float("-inf") else 0 for f in fitness] # Increment trick
 
-    return choices(self.population, weights=fitness)[0]
+    return choices(self.individuals, weights=fitness)[0]
 
 
   def selectParents(self) -> List[Tuple[Gene]]:
@@ -43,7 +44,7 @@ class Population:
     half the dimension of the current population
     """
 
-    pop_size = len(self.population)
+    pop_size = len(self.individuals)
     parents_num = pop_size // 2
     
     parents = [
@@ -51,47 +52,49 @@ class Population:
     ]
 
 
-  def generations(self) -> List[Gene]:
+  def generations(self) -> Tuple[List[Gene], int]:
     for _ in range(Config.GeneticAlgoTuning.iterationsNumber):
       self.generateOffspring()
       self.mutate()
       self.fight()
       
-      self.fitnessMean = np.mean([g.fitnessCached for g in self.population])
-      self.fitnessStdDev = np.std([g.fitnessCached for g in self.population])
+      self.fitnessMean = np.mean([g.fitnessCached for g in self.individuals])
+      self.fitnessStdDev = np.std([g.fitnessCached for g in self.individuals])
       logging.info(
         f"\nFitness:\n"
         f"\tMean: {self.fitnessMean:.4f}\n"
         f"\tSd: {self.fitnessStdDev:.4f}\n"
-        f"Population size: {len(self.population)}"
+        f"Population size: {len(self.individuals)}"
       )
 
       self.king = \
-        self.population[0] if self.population[0].fitnessCached > self.king.fitnessCached else self.king
+        self.individuals[0] if self.individuals[0].fitnessCached > self.king.fitnessCached else self.king
       
       if self.fitnessStdDev <= np.finfo(np.float32).eps:
         return
 
       self.generationNumber += 1
-      yield self.population, self.generationNumber
+      yield self.individuals, self.generationNumber
     
   
   def fight(self):
     """This step filters out non-valid individuals and
     keeps only some of them according to the turnover rate
     """
-    oldGenerationSize = len(self.population)
+    oldGenerationSize = len(self.individuals)
 
-    self.population = list(
+    self.individuals = list(
       filter(
       lambda x: x.isValid(),
-      self.population
+      self.individuals
     ))
 
-    logging.warning(f"Killed {oldGenerationSize - len(self.population)} ({(oldGenerationSize - len(self.population)) / oldGenerationSize * 100:.1f}%) genes")
+    self.killedGenes = oldGenerationSize - len(self.individuals)
+    self.killedGenesRatio = self.killedGenes / oldGenerationSize * 100
+    logging.warning(f"Killed {self.killedGenes} ({self.killedGenesRatio:.1f}%) genes")
 
     survivedGenesNumber = ceil(Config.GeneticAlgoTuning.turnoverRate * Config.GeneticAlgoTuning.populationSize)
-    self.population = sorted(self.population, reverse=True)[ : survivedGenesNumber]
+    self.individuals = sorted(self.individuals, reverse=True)[ : survivedGenesNumber]
   
   def crossover(self, mother: Gene, father: Gene):
     cutpointIdx = randrange(Config.GeneEncoding.segmentsNumber)
@@ -108,7 +111,7 @@ class Population:
 
   def generateOffspring(self):
     newGenerationSize = floor((1.0 - Config.GeneticAlgoTuning.turnoverRate) * Config.GeneticAlgoTuning.populationSize)
-    oldGenerationSize = len(self.population)
+    oldGenerationSize = len(self.individuals)
 
     for _ in range(newGenerationSize // 2):
       momGene = self.extractParent()
@@ -116,12 +119,14 @@ class Population:
       
       newGene1, newGene2 = self.crossover(momGene, dadGene)
 
-      self.population.append(newGene1)
-      self.population.append(newGene2)
+      self.individuals.append(newGene1)
+      self.individuals.append(newGene2)
+
+      self.newbornsCounter += 2
     
   def mutate(self):
-    toMutateSize = ceil(Config.GeneticAlgoTuning.mutationRate * len(self.population))
-    genesToMutate = sample(self.population, k = toMutateSize)
+    toMutateSize = ceil(Config.GeneticAlgoTuning.mutationRate * len(self.individuals))
+    genesToMutate = sample(self.individuals, k = toMutateSize)
 
     for gene in genesToMutate:
       mutationAngles = (np.random.rand(Config.GeneEncoding.segmentsNumber) - 0.5) \

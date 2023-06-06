@@ -8,7 +8,7 @@ class NichePopulation(Population):
     def __init__(self):
         super().__init__(Config.GeneticAlgoTuning.worldHeight * Config.GeneticAlgoTuning.worldWidth)
         
-        self.world: np.ndarray = np.array(self.population).reshape(
+        self.world: np.ndarray = np.array(self.individuals).reshape(
             Config.GeneticAlgoTuning.worldHeight,
             Config.GeneticAlgoTuning.worldWidth
         )
