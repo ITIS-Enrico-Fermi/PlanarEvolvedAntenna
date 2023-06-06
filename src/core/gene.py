@@ -13,7 +13,7 @@ class Gene:
     STANDARD_DEVIATION_K = 0
     # STANDARD_DEVIATION_K = -1    # Penalize high sd
 
-    def __init__(self, providedGenotype: List[Tuple] = None, gndDistance: float = 1.0):
+    def __init__(self, providedGenotype = None, gndDistance: float = 1.0):
         self.FIRST_POINT = Point(- Config.ShapeConstraints.outerDiam / 2, 0)
 
         self.radiationPatternSagittal = None
@@ -28,7 +28,7 @@ class Gene:
         self.serial = Gene.globalSerial
         Gene.globalSerial += 1
 
-        if providedGenotype:
+        if not providedGenotype is None:
             self.encoding = providedGenotype
             self.groundPlaneDistance = gndDistance
 
@@ -80,9 +80,9 @@ class Gene:
         INNER_RADIUS = Config.ShapeConstraints.innerDiam / 2
         
         return (
-            not isSelfIntersectingPath(self.encoding) and
-            not doesPathIntersectCircle(self.encoding, Point(Config.ShapeConstraints.centerShift, 0), INNER_RADIUS) and
-            isPathInCircle(self.encoding, Point(0, 0), OUTER_RADIUS)
+            not isSelfIntersectingPath(self.getPolychain()) and
+            not doesPathIntersectCircle(self.getPolychain(), Point(Config.ShapeConstraints.centerShift, 0), INNER_RADIUS) and
+            isPathInCircle(self.getPolychain(), Point(0, 0), OUTER_RADIUS)
         )
 
     def fitness(self) -> np.float16:

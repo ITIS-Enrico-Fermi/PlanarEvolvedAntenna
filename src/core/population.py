@@ -94,11 +94,11 @@ class Population:
     def crossover(self, mother: Gene, father: Gene):
         cutpointIdx = randrange(Config.GeneEncoding.segmentsNumber)
         newGene1 = Gene(
-            mother[:cutpointIdx] + father[cutpointIdx:],
+            np.row_stack((mother[:cutpointIdx], father[cutpointIdx:])),
             np.average([father.groundPlaneDistance, mother.groundPlaneDistance])
         )
         newGene2 = Gene(
-            father[:cutpointIdx] + mother[cutpointIdx:],
+            np.row_stack((father[:cutpointIdx], mother[cutpointIdx:])),
             np.average([father.groundPlaneDistance, mother.groundPlaneDistance])
         )
 

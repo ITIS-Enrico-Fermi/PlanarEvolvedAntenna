@@ -87,10 +87,8 @@ class NichePopulation(Population):
                 size = Config.GeneEncoding.segmentsNumber + 1
             )
 
-            newEncoding = gene.getCartesianCoords()
-            newEncoding = polychainToCartesian(newEncoding)
-            newEncoding += [xMutation, yMutation]
-            newEncoding = cartesianToPolychain(newEncoding)
+            newEncoding = gene.encoding
+            newEncoding += np.column_stack((xMutation, yMutation))
 
             gene.setEncoding(newEncoding)
             gene.setGroundPlaneDistance(mutationGpDistance)

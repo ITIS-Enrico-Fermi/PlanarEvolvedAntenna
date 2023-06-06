@@ -27,7 +27,7 @@ def simulationStep(pop: Population, doPlot: bool, *_, **kwargs) -> None:
                 f"Best fitness: {generation[0].fitness():.2f} -\n"
                 f"Mean fitness: {pop.fitnessMean:.2f} -\n"
                 f"Sd fitness: {pop.fitnessStdDev:.2f}",
-            polychain = generation[0].getCartesianCoords(),    # Plot only best performing individual
+            polychain = generation[0].getPolychain(),    # Plot only best performing individual
             radiationSagittal = generation[0].getRadiationPatternSagittal(),
             radiationFrontal = generation[0].getRadiationPatternFrontal(),
             groundPlaneDistance = generation[0].groundPlaneDistance,

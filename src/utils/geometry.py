@@ -145,11 +145,11 @@ def doesPathIntersectCircle(polychain: List[Segment], center: Point, radius: flo
     
     return False
 
-def randomPointsInsideCircle(numberOfPoints: int, circleRadius: float) -> List[Tuple]:
+def randomPointsInsideCircle(numberOfPoints: int, circleRadius: float) -> np.ndarray[Tuple]:
     rhos = np.random.uniform(0, circleRadius, numberOfPoints) # Points distance from origin in polar coordinates
     thetas = np.random.uniform(0, 2*np.pi, numberOfPoints)  # Points angles in polar coordinates
 
-    points = [polarToCart(r, t) for r, t in zip(rhos, thetas)]
-    points = [(x+circleRadius, y+circleRadius) for x,y in points]
+    x, y = polarToCart(rhos, thetas)
+    points = np.column_stack((x, y))
 
     return points
