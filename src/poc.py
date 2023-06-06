@@ -6,6 +6,7 @@ import matplotlib.animation as animation
 from rf.radiation import RadiationPattern
 from services.plotters import *
 from services.persistence import *
+from services.statistics import *
 from utils.amenities import plotPathAndRad, saveSvg
 from core.config import Config
 from core.population import Population
@@ -46,16 +47,20 @@ def main(doPlot: bool, outdir: str, withBoundaries: bool):
   killedGraph = fig.add_subplot(PLOT_ROWS, PLOT_COLS, 5)
   distanceGraph = fig.add_subplot(PLOT_ROWS, PLOT_COLS, 6)
   fig.tight_layout()
-  
+
+  statService = StatService(join("results", "stats.mat")).withGraphers(
+    FitnessPlotter(fitnessGraph),
+    KilledGenesPlotter(killedGraph),
+    EuclideanDistancePlotter(distanceGraph)
+  )
+
   pop = Population()
   sim = Simulation(pop) \
     .withService(PlanarShapePlotter(shape)) \
     .withService(RadiationPatternPlotter(radPatternFront, Gene.getRadiationPatternFrontal)) \
     .withService(RadiationPatternPlotter(radPatternSag, Gene.getRadiationPatternSagittal)) \
     .withService(persistenceService) \
-    .withService(FitnessPlotter(fitnessGraph)) \
-    .withService(KilledGenesPlotter(killedGraph)) \
-    .withService(EuclideanDistancePlotter(distanceGraph))
+    .withService(statService)
 
   try:
     if doPlot:

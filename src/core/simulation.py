@@ -2,18 +2,22 @@ import logging
 from typing import List
 from services.plotters import *
 from services.persistence import *
+from services.statistics import *
 
 class Simulation:
   def __init__(self, population: Population):
     self.population = population
     self.plotterServices: List[IPlotterService] = list()
     self.persistenceServices: List[IPersistenceService] = list()
+    self.statServices: List[IStatService] = list()
 
   def withService(self, service: Service) -> Any:
     if isinstance(service, IPlotterService):
       target = self.plotterServices
     elif isinstance(service, IPersistenceService):
       target = self.persistenceServices
+    elif isinstance(service, IStatService):
+      target = self.statServices
     
     target.append(service)
 
@@ -25,6 +29,9 @@ class Simulation:
     
     for saver in self.persistenceServices:
       saver.save(self.population)
+    
+    for stater in self.statServices:
+      stater.stat(self.population)
   
   def run(self, *_) -> None:
     generation, epoch = next(self.population.generations())

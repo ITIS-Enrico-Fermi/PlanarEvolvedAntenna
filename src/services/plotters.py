@@ -1,4 +1,4 @@
-from typing import Any, Callable
+from typing import Dict, Any, Callable
 from abc import ABC, abstractmethod
 from core.population import Population
 from services.service import Service
@@ -13,9 +13,23 @@ class IPlotterService(Service):
   def plot(self, population: Population) -> Any:
     ...
 
+
+class IGrapherService(IPlotterService):
+  def __init__(self, axes: Axes):
+    self.axes = axes
+
+  @abstractmethod
+  def plot(self, population: Population) -> Dict[str, List]:
+    """plots on axes and returns a dictionary of plotted values.
+    @return what it has just plotted in a dictionary. Keys will be used as labels.
+    """
+    ...
+
+
 class StubPlotterService(IPlotterService):
   def plot(self, population: Population) -> None:
     return
+
 
 class PlanarShapePlotter(IPlotterService):
   """
@@ -51,18 +65,18 @@ class RadiationPatternPlotter(IPlotterService):
     )
 
 
-class FitnessPlotter(IPlotterService):
+class FitnessPlotter(IGrapherService):
   """
   Fitness max, mean and standard deviation plotter
   """
   def __init__(self, axes: Axes):
     self.axes = axes
+    self.timeline = []
     self.meanValues = []
     self.maxValues = []
     self.sdValues = []
-    self.timeline = []
 
-  def plot(self, population: Population) -> None:
+  def plot(self, population: Population) -> Dict[str, List]:
     self.timeline.append(population.newbornsCounter)
     self.meanValues.append(population.fitnessMean)
     self.maxValues.append(population.king.fitness())
@@ -78,16 +92,24 @@ class FitnessPlotter(IPlotterService):
     )
     self.axes.legend(["mean", "max", "sd"])
 
-class EuclideanDistancePlotter(IPlotterService):
+    return {
+      "timeline": self.timeline,
+      "meanFitness": self.meanValues,
+      "maxFitness": self.maxValues,
+      "sdFitness": self.sdValues
+    }
+
+
+class EuclideanDistancePlotter(IGrapherService):
   """
   Mean hamming distance between population's genes plotter
   """
   def __init__(self, axes: Axes):
     self.axes = axes
     self.timeline = []
-    self.euclideanDistance = []
+    self.euclideanDistanceValues = []
   
-  def plot(self, population: Population) -> None:
+  def plot(self, population: Population) -> Dict[str, List]:
     self.timeline.append(population.newbornsCounter)
     kingX = np.array(list(map(lambda seg: seg.start.x, population.king.polychainEncoding)))
     kingY = np.array(list(map(lambda seg: seg.start.y, population.king.polychainEncoding)))
@@ -99,25 +121,33 @@ class EuclideanDistancePlotter(IPlotterService):
     kingNodes = np.array(list(zip(kingX, kingY)))
     othersNodes = np.array(list(zip(othersX, othersY)))
 
-    self.euclideanDistance.append(np.sum(np.linalg.norm(kingNodes - othersNodes, axis=1)) / len(population.individuals))
+    self.euclideanDistanceValues.append(
+      np.sum(np.linalg.norm(kingNodes - othersNodes, axis=1)) / len(population.individuals)
+    )
 
     self.axes.clear()
     self.axes.set_title("Distance from king")
     self.axes.grid(True)
     self.axes.plot(
-      self.timeline, self.euclideanDistance,
+      self.timeline, self.euclideanDistanceValues,
     )
 
-class KilledGenesPlotter(IPlotterService):
+    return {
+      "timeline": self.timeline,
+      "kingDistance": self.euclideanDistanceValues
+    }
+
+
+class KilledGenesPlotter(IGrapherService):
   """
   Number of killed  genes plotter
   """
   def __init__(self, axes: Axes):
     self.axes = axes
-    self.killedGenes = []
     self.timeline = []
+    self.killedGenes = []
 
-  def plot(self, population: Population) -> None:
+  def plot(self, population: Population) -> Dict[str, List]:
     self.timeline.append(population.newbornsCounter)
     self.killedGenes.append(population.killedGenesRatio)
 
@@ -127,3 +157,8 @@ class KilledGenesPlotter(IPlotterService):
     self.axes.plot(
       self.timeline, self.killedGenes,
     )
+
+    return {
+      "timeline": self.timeline,
+      "killedGenes": self.killedGenes
+    }
