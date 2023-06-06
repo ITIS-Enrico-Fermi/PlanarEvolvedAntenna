@@ -8,6 +8,10 @@ from utils.amenities import *
 class IPlotterService(Service):
   def __init__(self, axes: Axes):
     self.axes = axes
+    self.__post_init__()
+
+  def __post_init__(self) -> Any:
+    ...
 
   @abstractmethod
   def plot(self, population: Population) -> Any:
@@ -15,9 +19,14 @@ class IPlotterService(Service):
 
 
 class IGrapherService(IPlotterService):
-  def __init__(self, axes: Axes):
+  def __init__(self, axes: Axes, plotNumber: int):
     self.axes = axes
+    self.plotNum = plotNumber
+    self.__post_init__()
 
+  def __post_init__(self) -> Any:
+    ...
+  
   @abstractmethod
   def plot(self, population: Population) -> Dict[str, List]:
     """plots on axes and returns a dictionary of plotted values.
@@ -69,8 +78,7 @@ class FitnessPlotter(IGrapherService):
   """
   Fitness max, mean and standard deviation plotter
   """
-  def __init__(self, axes: Axes):
-    self.axes = axes
+  def __post_init__(self):
     self.timeline = []
     self.meanValues = []
     self.maxValues = []
@@ -93,10 +101,10 @@ class FitnessPlotter(IGrapherService):
     self.axes.legend(["mean", "max", "sd"])
 
     return {
-      "timeline": self.timeline,
-      "meanFitness": self.meanValues,
-      "maxFitness": self.maxValues,
-      "sdFitness": self.sdValues
+      f"timeline{self.plotNum}": self.timeline,
+      f"meanFitness{self.plotNum}": self.meanValues,
+      f"maxFitness{self.plotNum}": self.maxValues,
+      f"sdFitness{self.plotNum}": self.sdValues
     }
 
 
@@ -104,8 +112,7 @@ class EuclideanDistancePlotter(IGrapherService):
   """
   Mean hamming distance between population's genes plotter
   """
-  def __init__(self, axes: Axes):
-    self.axes = axes
+  def __post_init__(self):
     self.timeline = []
     self.euclideanDistanceValues = []
   
@@ -133,8 +140,8 @@ class EuclideanDistancePlotter(IGrapherService):
     )
 
     return {
-      "timeline": self.timeline,
-      "kingDistance": self.euclideanDistanceValues
+      f"timeline{self.plotNum}": self.timeline,
+      f"kingDistance{self.plotNum}": self.euclideanDistanceValues
     }
 
 
@@ -142,8 +149,7 @@ class KilledGenesPlotter(IGrapherService):
   """
   Number of killed  genes plotter
   """
-  def __init__(self, axes: Axes):
-    self.axes = axes
+  def __post_init__(self):
     self.timeline = []
     self.killedGenes = []
 
@@ -159,6 +165,6 @@ class KilledGenesPlotter(IGrapherService):
     )
 
     return {
-      "timeline": self.timeline,
-      "killedGenes": self.killedGenes
+      f"timeline{self.plotNum}": self.timeline,
+      f"killedGenes{self.plotNum}": self.killedGenes
     }

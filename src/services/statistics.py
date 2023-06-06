@@ -1,5 +1,6 @@
 from abc import abstractclassmethod, abstractmethod
-from typing import List, Any
+from sre_constants import ANY_ALL
+from typing import List, Dict, Any
 from services.service import Service
 from services.plotters import IGrapherService
 from core.population import Population
@@ -16,11 +17,20 @@ class AxesStub(Axes):
   def plot(self, *_):
     pass
 
+class ICollectorService(Service):
+  def __init__(self, filename: str):
+    self.filename = filename
+    self.dataDict = {}
+  
+  def updateData(self, dataDict: Dict[str, List]) -> None:
+    ...
 
 class IStatService(Service):
   def __init__(self, filename: str):
-    self.filename = filename
-    self.graphers = []
+    self.filename: str = filename
+    self.graphers: List[IGrapherService] = []
+    self.collectors: List[ICollectorService] = []
+    self.valuesDict: Dict[str, List] = {}
   
   def withGraphers(self, *graphers: List[IGrapherService]) -> Any:
     self.graphers += graphers
@@ -42,4 +52,12 @@ class StatService(IStatService):
     for grapher in self.graphers:
       mergedDict |= grapher.plot(population)
 
+    self.valuesDict = mergedDict
     savemat(self.filename, mergedDict)
+
+class AggregateStatService(ICollectorService):
+  def __init__(self, filename: str):
+    self.filename: str = filename
+  
+  def updateData(self, dataDict: Dict[str, List]) -> None:
+    ...

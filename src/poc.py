@@ -11,11 +11,12 @@ from utils.amenities import plotPathAndRad, saveSvg
 from core.config import Config
 from core.population import Population
 from core.simulation import Simulation
+from multiprocessing import Pool
 from functools import partial
 
 CONFIG_FILENAME = "config.yaml"
 
-def main(doPlot: bool, outdir: str, withBoundaries: bool):
+def main(doPlot: bool, outdir: str, withBoundaries: bool, statService: IStatService, instanceNumber: int = 0):
   signal.signal(signal.SIGINT, lambda *_: quit())
 
   logging.basicConfig(
@@ -39,7 +40,7 @@ def main(doPlot: bool, outdir: str, withBoundaries: bool):
   
   PLOT_ROWS = 2
   PLOT_COLS = 3
-  fig = plt.figure()
+  fig = plt.figure(f"Simulation {instanceNumber}")
   shape = fig.add_subplot(PLOT_ROWS, PLOT_COLS, 1)
   radPatternSag = fig.add_subplot(PLOT_ROWS, PLOT_COLS, 2, projection='polar')
   radPatternFront = fig.add_subplot(PLOT_ROWS, PLOT_COLS, 3, projection='polar')
@@ -48,10 +49,10 @@ def main(doPlot: bool, outdir: str, withBoundaries: bool):
   distanceGraph = fig.add_subplot(PLOT_ROWS, PLOT_COLS, 6)
   fig.tight_layout()
 
-  statService = StatService(join("results", "stats.mat")).withGraphers(
-    FitnessPlotter(fitnessGraph),
-    KilledGenesPlotter(killedGraph),
-    EuclideanDistancePlotter(distanceGraph)
+  statService.withGraphers(
+    FitnessPlotter(fitnessGraph, instanceNumber),
+    KilledGenesPlotter(killedGraph, instanceNumber),
+    EuclideanDistancePlotter(distanceGraph, instanceNumber)
   )
 
   pop = Population()
@@ -71,6 +72,8 @@ def main(doPlot: bool, outdir: str, withBoundaries: bool):
         sim.run()
   except StopIteration:
     quit()
+  
+  return sim.population.generationNumber
 
 
 if __name__ == "__main__":
@@ -93,6 +96,18 @@ if __name__ == "__main__":
     default=False, action="store_true"
   )
 
+  parser.add_argument(
+    "-bm", "--benchmark-instances", help="Number of benchmark's paralell simulations",
+    type=int, default=1
+  )
+
   args = parser.parse_args()
 
-  main(args.plot, args.outdir, args.with_boundaries)
+  statServices = [StatService(join("results", f"stats{i}.mat")) for i in range(args.benchmark_instances)]
+
+  parallelMain = partial(main, args.plot, args.outdir, args.with_boundaries)
+  with Pool(args.benchmark_instances) as p:
+    print(
+      "Generations: ",
+      p.starmap(parallelMain, [(statService, i) for i, statService in enumerate(statServices)])
+    )
