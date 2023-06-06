@@ -76,6 +76,7 @@ class FitnessPlotter(IPlotterService):
       self.timeline, self.maxValues,
       self.timeline, self.sdValues
     )
+    self.axes.legend(["mean", "max", "sd"])
 
 class EuclideanDistancePlotter(IPlotterService):
   """
