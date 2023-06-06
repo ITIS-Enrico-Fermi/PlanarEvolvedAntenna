@@ -75,11 +75,14 @@ class NichePopulation(Population):
                 size = 1
             )[0]
 
+            """
             xMutation = np.random.uniform(
-                low = - (Config.GeneEncoding.minSegmentLen + Config.GeneEncoding.maxSegmentLen) / 2,
-                high = (Config.GeneEncoding.minSegmentLen + Config.GeneEncoding.maxSegmentLen) / 2,
+                low = -0.2,
+                high = 0.2,
                 size = Config.GeneEncoding.segmentsNumber + 1
             )
+            """
+            xMutation = np.array([0] * (Config.GeneEncoding.segmentsNumber + 1))
 
             yMutation = np.random.uniform(
                 low = - (Config.GeneEncoding.minSegmentLen + Config.GeneEncoding.maxSegmentLen) / 2,

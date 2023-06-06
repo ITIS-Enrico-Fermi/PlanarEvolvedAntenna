@@ -1,5 +1,6 @@
 import numpy as np
 from typing import List, Tuple
+from itertools import tee
 
 class PolarCoord:
     def __init__(self, angle: float, distance: float):
@@ -40,14 +41,10 @@ class Segment:
 Polychain = List[Segment]
 
 def cartesianToPolychain(coords: List[Tuple]) -> Polychain:
-    chain = list()
-    points = [Point(x, y) for x, y in coords]
-    prev_pt = points[0]
-    for new_pt in points[1:]:
-        chain.append(Segment(prev_pt, new_pt))
-        prev_pt = new_pt
+    lx, dx = tee(coords)
+    next(dx)
 
-    return chain
+    return [Segment(Point(*p1), Point(*p2)) for p1, p2 in zip(lx, dx)]
 
 def polychainToCartesian(chain: Polychain) -> List[Point]:
     coords = list()
@@ -146,10 +143,10 @@ def doesPathIntersectCircle(polychain: List[Segment], center: Point, radius: flo
     return False
 
 def randomPointsInsideCircle(numberOfPoints: int, circleRadius: float) -> np.ndarray[Tuple]:
-    rhos = np.random.uniform(0, circleRadius, numberOfPoints) # Points distance from origin in polar coordinates
-    thetas = np.random.uniform(0, 2*np.pi, numberOfPoints)  # Points angles in polar coordinates
+    x = np.random.uniform(0, circleRadius, numberOfPoints)
+    x = np.sort(x)
+    y = np.random.uniform(0, 0.5, numberOfPoints)
 
-    x, y = polarToCart(rhos, thetas)
     points = np.column_stack((x, y))
 
     return points
