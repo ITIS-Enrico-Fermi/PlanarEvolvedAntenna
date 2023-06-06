@@ -1,6 +1,7 @@
 import numpy as np
 from typing import List, Tuple
 from itertools import tee
+from config import Config
 
 class PolarCoord:
     def __init__(self, angle: float, distance: float):
@@ -47,9 +48,7 @@ def cartesianToPolychain(coords: List[Tuple]) -> Polychain:
     return [Segment(Point(*p1), Point(*p2)) for p1, p2 in zip(lx, dx)]
 
 def polychainToCartesian(chain: Polychain) -> List[Point]:
-    coords = list()
-    for s in chain:
-        coords.append(s.start)
+    coords = [p.start for p in chain]
     coords.append(chain[-1].end)
 
     return coords
@@ -71,7 +70,7 @@ def polarToPolychain(startPoint: Point, polarCoords: List[PolarCoord]) -> List[S
 
     p1 = startPoint
     for rc in polarCoords:
-        p2 = p1 + polarToCart(rc)
+        p2 = p1 + Point(*polarToCart(rc.distance, rc.angle))
         segments.append(Segment(p1, p2))
         p1 = p2
     
@@ -143,10 +142,23 @@ def doesPathIntersectCircle(polychain: List[Segment], center: Point, radius: flo
     return False
 
 def randomPointsInsideCircle(numberOfPoints: int, circleRadius: float) -> np.ndarray[Tuple]:
-    x = np.random.uniform(0, circleRadius, numberOfPoints)
+    x = np.random.uniform(-circleRadius, circleRadius, numberOfPoints)
     x = np.sort(x)
-    y = np.random.uniform(0, 0.5, numberOfPoints)
+    y = np.random.uniform(-circleRadius, circleRadius, numberOfPoints)
 
     points = np.column_stack((x, y))
 
     return points
+
+def randomPointsRod(config: Config.GeneEncoding) -> np.ndarray[Tuple]:
+    lengths = np.random.uniform(config.minSegmentLen, config.maxSegmentLen, config.segmentsNumber)
+    angles = np.random.uniform(-np.pi/config.segmentsNumber/2, np.pi/config.segmentsNumber/2, config.segmentsNumber)
+
+    rodEncoding = list(zip(angles, lengths))
+    rodEncoding = [PolarCoord(a, l) for (a, l) in rodEncoding]
+
+    polychain = polarToPolychain(Point(-33, 0), rodToPolar(rodEncoding))    #TODO: extract -33 as parameter
+
+    points = polychainToCartesian(polychain)
+
+    return np.array([(p.x, p.y) for p in points])

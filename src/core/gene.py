@@ -33,7 +33,8 @@ class Gene:
             self.groundPlaneDistance = gndDistance
 
         else:
-            points = randomPointsInsideCircle(Config.GeneEncoding.segmentsNumber + 1, Config.ShapeConstraints.outerDiam/2)
+            #points = randomPointsInsideCircle(Config.GeneEncoding.segmentsNumber + 1, Config.ShapeConstraints.outerDiam/2)
+            points = randomPointsRod(Config.GeneEncoding)
             self.encoding = points
 
 
@@ -123,7 +124,7 @@ class Gene:
                 )
 
         except AssertionError:
-            print(nec_error_message())
+            logging.debug(nec_error_message())
             self.fitnessCached = float("-inf")    # This gene will be discarded at the next iteration
 
         return self.fitnessCached
