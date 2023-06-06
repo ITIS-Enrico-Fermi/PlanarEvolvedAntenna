@@ -58,27 +58,54 @@ class FitnessPlotter(IPlotterService):
   def __init__(self, axes: Axes):
     self.axes = axes
     self.meanValues = []
+    self.maxValues = []
     self.sdValues = []
+    self.timeline = []
 
   def plot(self, population: Population) -> None:
+    self.timeline.append(population.newbornsCounter)
     self.meanValues.append(population.fitnessMean)
+    self.maxValues.append(population.king.fitness())
     self.sdValues.append(population.fitnessStdDev)
-    time = list(range(population.generationNumber))
 
     self.axes.clear()
     self.axes.set_title("Fitness")
     self.axes.grid(True)
     self.axes.plot(
-      time, self.meanValues,
-      time, self.sdValues
+      self.timeline, self.meanValues,
+      self.timeline, self.maxValues,
+      self.timeline, self.sdValues
     )
 
-class HammingDistancePlotter(IPlotterService):
+class EuclideanDistancePlotter(IPlotterService):
   """
   Mean hamming distance between population's genes plotter
   """
+  def __init__(self, axes: Axes):
+    self.axes = axes
+    self.timeline = []
+    self.euclideanDistance = []
+  
   def plot(self, population: Population) -> None:
-    ...
+    self.timeline.append(population.newbornsCounter)
+    kingX = np.array(list(map(lambda seg: seg.start.x, population.king.polychainEncoding)))
+    kingY = np.array(list(map(lambda seg: seg.start.y, population.king.polychainEncoding)))
+
+    for individual in population.individuals:
+      othersX = np.array(list(map(lambda seg: seg.start.x, individual.polychainEncoding)))
+      othersY = np.array(list(map(lambda seg: seg.start.y, individual.polychainEncoding)))
+    
+    kingNodes = np.array(list(zip(kingX, kingY)))
+    othersNodes = np.array(list(zip(othersX, othersY)))
+
+    self.euclideanDistance.append(np.sum(np.linalg.norm(kingNodes - othersNodes, axis=1)) / len(population.individuals))
+
+    self.axes.clear()
+    self.axes.set_title("Distance from king")
+    self.axes.grid(True)
+    self.axes.plot(
+      self.timeline, self.euclideanDistance,
+    )
 
 class KilledGenesPlotter(IPlotterService):
   """
@@ -87,14 +114,15 @@ class KilledGenesPlotter(IPlotterService):
   def __init__(self, axes: Axes):
     self.axes = axes
     self.killedGenes = []
+    self.timeline = []
 
   def plot(self, population: Population) -> None:
+    self.timeline.append(population.newbornsCounter)
     self.killedGenes.append(population.killedGenesRatio)
-    time = list(range(population.generationNumber))
 
     self.axes.clear()
     self.axes.set_title("Killed genes ratio")
     self.axes.grid(True)
     self.axes.plot(
-      time, self.killedGenes,
+      self.timeline, self.killedGenes,
     )

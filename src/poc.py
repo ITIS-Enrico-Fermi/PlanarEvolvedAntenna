@@ -44,6 +44,7 @@ def main(doPlot: bool, outdir: str, withBoundaries: bool):
   radPatternFront = fig.add_subplot(PLOT_ROWS, PLOT_COLS, 3, projection='polar')
   fitnessGraph = fig.add_subplot(PLOT_ROWS, PLOT_COLS, 4)
   killedGraph = fig.add_subplot(PLOT_ROWS, PLOT_COLS, 5)
+  distanceGraph = fig.add_subplot(PLOT_ROWS, PLOT_COLS, 6)
   fig.tight_layout()
   
   pop = Population()
@@ -53,7 +54,8 @@ def main(doPlot: bool, outdir: str, withBoundaries: bool):
     .withService(RadiationPatternPlotter(radPatternSag, Gene.getRadiationPatternSagittal)) \
     .withService(persistenceService) \
     .withService(FitnessPlotter(fitnessGraph)) \
-    .withService(KilledGenesPlotter(killedGraph))
+    .withService(KilledGenesPlotter(killedGraph)) \
+    .withService(EuclideanDistancePlotter(distanceGraph))
 
   try:
     if doPlot:

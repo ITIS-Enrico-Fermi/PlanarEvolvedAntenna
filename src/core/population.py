@@ -11,6 +11,7 @@ class Population:
   def __init__(self, pop_size: int = Config.GeneticAlgoTuning.populationSize):
     self.individuals = [Gene() for _ in range(pop_size)]
     self.generationNumber = 0
+    self.newbornsCounter = 0
     self.king = Gene()
 
   def extractParent(self) -> Gene:
@@ -120,6 +121,8 @@ class Population:
 
       self.individuals.append(newGene1)
       self.individuals.append(newGene2)
+
+      self.newbornsCounter += 2
     
   def mutate(self):
     toMutateSize = ceil(Config.GeneticAlgoTuning.mutationRate * len(self.individuals))
