@@ -13,6 +13,7 @@ from core.population import Population
 from core.simulation import Simulation
 from multiprocessing import Pool
 from functools import partial
+from scipy.io import savemat
 
 CONFIG_FILENAME = "config.yaml"
 
@@ -50,9 +51,9 @@ def main(doPlot: bool, outdir: str, withBoundaries: bool, statService: IStatServ
   fig.tight_layout()
 
   statService.withGraphers(
-    FitnessPlotter(fitnessGraph, instanceNumber),
-    KilledGenesPlotter(killedGraph, instanceNumber),
-    EuclideanDistancePlotter(distanceGraph, instanceNumber)
+    FitnessPlotter(fitnessGraph),
+    KilledGenesPlotter(killedGraph),
+    EuclideanDistancePlotter(distanceGraph)
   )
 
   pop = Population()
@@ -71,9 +72,9 @@ def main(doPlot: bool, outdir: str, withBoundaries: bool, statService: IStatServ
       while True:
         sim.run()
   except StopIteration:
-    quit()
+    return statService.valuesDict
   
-  return sim.population.generationNumber
+  return statService.valuesDict
 
 
 if __name__ == "__main__":
@@ -107,7 +108,19 @@ if __name__ == "__main__":
 
   parallelMain = partial(main, args.plot, args.outdir, args.with_boundaries)
   with Pool(args.benchmark_instances) as p:
-    print(
-      "Generations: ",
-      p.starmap(parallelMain, [(statService, i) for i, statService in enumerate(statServices)])
-    )
+    statsDicts = p.starmap(parallelMain, [(statService, i) for i, statService in enumerate(statServices)])
+
+  outStats = {}
+  minLength = min([len(d['timeline']) for d in statsDicts])
+  for statName in statsDicts[0].keys():
+    rawValues = None
+
+    for d in statsDicts:
+      if rawValues is not None:
+        rawValues = np.vstack((rawValues, d[statName][:minLength]))
+      else:
+        rawValues = np.array(d[statName][:minLength])
+    
+    outStats[statName] = np.mean(rawValues, axis=0)
+
+  savemat(join("results", "aggregate_stats.mat"), outStats)

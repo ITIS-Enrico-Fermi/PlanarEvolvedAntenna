@@ -19,9 +19,8 @@ class IPlotterService(Service):
 
 
 class IGrapherService(IPlotterService):
-  def __init__(self, axes: Axes, plotNumber: int):
+  def __init__(self, axes: Axes):
     self.axes = axes
-    self.plotNum = plotNumber
     self.__post_init__()
 
   def __post_init__(self) -> Any:
@@ -101,10 +100,10 @@ class FitnessPlotter(IGrapherService):
     self.axes.legend(["mean", "max", "sd"])
 
     return {
-      f"timeline{self.plotNum}": self.timeline,
-      f"meanFitness{self.plotNum}": self.meanValues,
-      f"maxFitness{self.plotNum}": self.maxValues,
-      f"sdFitness{self.plotNum}": self.sdValues
+      "timeline": self.timeline,
+      "meanFitness": self.meanValues,
+      "maxFitness": self.maxValues,
+      "sdFitness": self.sdValues
     }
 
 
@@ -140,8 +139,8 @@ class EuclideanDistancePlotter(IGrapherService):
     )
 
     return {
-      f"timeline{self.plotNum}": self.timeline,
-      f"kingDistance{self.plotNum}": self.euclideanDistanceValues
+      "timeline": self.timeline,
+      "kingDistance": self.euclideanDistanceValues
     }
 
 
@@ -165,6 +164,6 @@ class KilledGenesPlotter(IGrapherService):
     )
 
     return {
-      f"timeline{self.plotNum}": self.timeline,
-      f"killedGenes{self.plotNum}": self.killedGenes
+      "timeline": self.timeline,
+      "killedGenes": self.killedGenes
     }

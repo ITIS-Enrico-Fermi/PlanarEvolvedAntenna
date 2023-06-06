@@ -1,4 +1,5 @@
 from abc import abstractclassmethod, abstractmethod
+from heapq import merge
 from sre_constants import ANY_ALL
 from typing import List, Dict, Any
 from services.service import Service
@@ -6,6 +7,7 @@ from services.plotters import IGrapherService
 from core.population import Population
 from matplotlib.axes import Axes
 from scipy.io import savemat
+from collections import defaultdict
 
 class AxesStub(Axes):
   def clear(self, *_):
@@ -41,12 +43,12 @@ class IStatService(Service):
     return self
 
   @abstractmethod
-  def stat(self, population: Population) -> None:
+  def stat(self, population: Population) -> Dict[str, List]:
     ...
 
 
 class StatService(IStatService):
-  def stat(self, population: Population) -> None:
+  def stat(self, population: Population) -> Dict[str, List]:
     mergedDict = {}
     
     for grapher in self.graphers:
@@ -54,10 +56,22 @@ class StatService(IStatService):
 
     self.valuesDict = mergedDict
     savemat(self.filename, mergedDict)
+    return mergedDict
+
+
+class StubAggregator(ICollectorService):
+  def __init__(self):
+    pass
+
+  def stat(self, *_):
+    pass
+
 
 class AggregateStatService(ICollectorService):
   def __init__(self, filename: str):
     self.filename: str = filename
-  
+    self.dataSnapshots: dict[int, List[Dict[str, List]]] = defaultdict(list)
+
   def updateData(self, dataDict: Dict[str, List]) -> None:
-    ...
+    self.dataSnapshots[dataDict['timeline'][-1]].append(dataDict.copy())
+    print(self.dataSnapshots)
