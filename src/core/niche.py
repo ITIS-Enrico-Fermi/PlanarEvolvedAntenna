@@ -38,8 +38,13 @@ class NichePopulation(Population):
 
         print("Fitness: ", fitness)
 
-        return choices(neigh, weights=fitness, k=2)
-    
+        try:
+            return choices(neigh, weights=fitness, k=2)
+        except ValueError:
+            logging.warn("The niche has no fitting genes. Extracting without weights")
+            return choices(neigh, k=2)
+
+
     def sampleNiche(self) -> np.ndarray:
         rows, cols = self.world.shape
 
@@ -63,7 +68,7 @@ class NichePopulation(Population):
         if childA > weakest:
             niche[x][y] = childA
             print(f"Sub ({x}, {y}) with child A with fitness: {childA}")
-        
+
     def mutate(self, niche):
         for gene in self.nicheToSet(niche):
             if random() > Config.GeneticAlgoTuning.mutationRate:
