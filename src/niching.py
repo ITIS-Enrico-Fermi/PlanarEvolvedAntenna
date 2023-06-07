@@ -72,7 +72,7 @@ def main(doPlot: bool, outdir: str, withBoundaries: bool):
             outputDirectory = outdir,
             withBoundaries = withBoundaries
         )
-        anim = animation.FuncAnimation(fig, simulation, interval=10, cache_frame_data=False)
+        anim = animation.FuncAnimation(fig, simulation, interval=1, cache_frame_data=False)
         plt.show()
         
     else:

@@ -152,7 +152,7 @@ def randomPointsInsideCircle(numberOfPoints: int, circleRadius: float) -> np.nda
 
 def randomPointsRod(config: Config.GeneEncoding) -> np.ndarray[Tuple]:
     lengths = np.random.uniform(config.minSegmentLen, config.maxSegmentLen, config.segmentsNumber)
-    angles = np.random.uniform(-np.pi/config.segmentsNumber/2, np.pi/config.segmentsNumber/2, config.segmentsNumber)
+    angles = np.random.uniform(-np.pi/config.segmentsNumber, np.pi/config.segmentsNumber, config.segmentsNumber)
 
     rodEncoding = list(zip(angles, lengths))
     rodEncoding = [PolarCoord(a, l) for (a, l) in rodEncoding]

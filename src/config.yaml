@@ -18,9 +18,9 @@ genetic_algo_tuning:
   world_height: 15
 
 gene_encoding:
-  segments_number: 2
+  segments_number: 10
   spline_interpolation: false
   max_angle: 3.14159265359  # rad
-  max_segment_length: 2  # mm
+  max_segment_length: 10  # mm
   min_segment_length: 1  # mm
 ...

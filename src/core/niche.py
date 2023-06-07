@@ -87,16 +87,19 @@ class NichePopulation(Population):
             )
 
             yMutation = np.random.uniform(
-                low = - (Config.GeneEncoding.minSegmentLen + Config.GeneEncoding.maxSegmentLen) / 2,
-                high = (Config.GeneEncoding.minSegmentLen + Config.GeneEncoding.maxSegmentLen) / 2,
+                low = -2,
+                high = 2,
                 size = Config.GeneEncoding.segmentsNumber + 1
             )
 
             newEncoding = gene.encoding
             newEncoding += np.column_stack((xMutation, yMutation))
+            newEncoding = newEncoding[newEncoding[:, 0].argsort()]
 
-            gene.setEncoding(newEncoding)
-            gene.setGroundPlaneDistance(mutationGpDistance)
+            mutatedGene = Gene(newEncoding, mutationGpDistance)
+            if mutatedGene.isValid():
+                gene.setEncoding(newEncoding)
+                gene.setGroundPlaneDistance(mutationGpDistance)
             
 
     def fight():
