@@ -101,7 +101,8 @@ class Gene:
     self.groundPlaneDistance = gpDist
 
   def isValid(self) -> bool:
-    """Returns true if the path is not slef-intersecting
+    """
+    Returns true if the path is not slef-intersecting
     and doesn't come across the inner hole
     """
     OUTER_RADIUS = Config.ShapeConstraints.outerDiam / 2

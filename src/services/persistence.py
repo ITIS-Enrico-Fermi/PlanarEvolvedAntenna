@@ -28,7 +28,7 @@ class MiniaturePersistenceService(IPersistenceService):
     )
 
     with open(filePath, "w") as outFile:
-      saveSvg(outFile, population.individuals, False)
+      saveMiniaturesSvg(outFile, population.individuals, False)
 
 
 class MiniatureWithBoundariesPersistenceService(IPersistenceService):
@@ -40,7 +40,7 @@ class MiniatureWithBoundariesPersistenceService(IPersistenceService):
     )
 
     with open(filePath, "w") as outFile:
-      saveSvg(outFile, population.individuals, True)
+      saveMiniaturesSvg(outFile, population.individuals, True)
 
 class PicklePersistenceService(IPersistenceService):
   def save(self, population: Population) -> None:

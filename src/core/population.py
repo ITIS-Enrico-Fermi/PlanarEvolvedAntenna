@@ -56,6 +56,7 @@ class Population:
     for _ in range(Config.GeneticAlgoTuning.iterationsNumber):
       self.generateOffspring()
       self.mutate()
+      self.cleanup()
       self.fight()
       
       self.fitnessMean = np.mean([g.fitnessCached for g in self.individuals])
@@ -77,9 +78,9 @@ class Population:
       yield self.individuals, self.generationNumber
     
   
-  def fight(self):
-    """This step filters out non-valid individuals and
-    keeps only some of them according to the turnover rate
+  def cleanup(self):
+    """
+    This step filters out non-valid individuals
     """
     oldGenerationSize = len(self.individuals)
 
@@ -93,7 +94,13 @@ class Population:
     self.killedGenesRatio = self.killedGenes / oldGenerationSize * 100
     logging.warning(f"Killed {self.killedGenes} ({self.killedGenesRatio:.1f}%) genes")
 
-    survivedGenesNumber = ceil(Config.GeneticAlgoTuning.turnoverRate * Config.GeneticAlgoTuning.populationSize)
+  def fight(self):
+    """
+    This step puts evolutive pressure on the system by pruning
+    the worst individuals (according to turnover rate)
+    """
+    survivorshipRate = 1 - Config.GeneticAlgoTuning.turnoverRate;
+    survivedGenesNumber = ceil(survivorshipRate * Config.GeneticAlgoTuning.populationSize)
     self.individuals = sorted(self.individuals, reverse=True)[ : survivedGenesNumber]
   
   def crossover(self, mother: Gene, father: Gene):
@@ -112,17 +119,20 @@ class Population:
   def generateOffspring(self):
     newGenerationSize = floor((1.0 - Config.GeneticAlgoTuning.turnoverRate) * Config.GeneticAlgoTuning.populationSize)
     oldGenerationSize = len(self.individuals)
+    newborns = []
 
     for _ in range(newGenerationSize // 2):
       momGene = self.extractParent()
       dadGene = self.extractParent()
       
       newGene1, newGene2 = self.crossover(momGene, dadGene)
+      
+      newborns.append(newGene1)
+      newborns.append(newGene2)
 
-      self.individuals.append(newGene1)
-      self.individuals.append(newGene2)
+    self.individuals += newborns
+    self.newbornsCounter += len(newborns)
 
-      self.newbornsCounter += 2
     
   def mutate(self):
     toMutateSize = ceil(Config.GeneticAlgoTuning.mutationRate * len(self.individuals))

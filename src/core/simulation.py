@@ -1,5 +1,6 @@
 import logging
 from typing import List
+from services.service import *
 from services.plotters import *
 from services.persistence import *
 from services.statistics import *
@@ -10,6 +11,7 @@ class Simulation:
     self.plotterServices: List[IPlotterService] = list()
     self.persistenceServices: List[IPersistenceService] = list()
     self.statServices: List[IStatService] = list()
+    self.liveViewers: List[ILiveViewService] = list()
 
   def withService(self, service: Service) -> Any:
     if isinstance(service, IPlotterService):
@@ -18,6 +20,11 @@ class Simulation:
       target = self.persistenceServices
     elif isinstance(service, IStatService):
       target = self.statServices
+    elif isinstance(service, ILiveViewService):
+      target = self.liveViewers
+    
+    if target is None:
+      raise ServiceNotDispatched("Unhandled service added to simulation. Manage it for proper working")
     
     target.append(service)
 
@@ -32,6 +39,9 @@ class Simulation:
     
     for stater in self.statServices:
       stater.stat(self.population)
+
+    for viewer in self.liveViewers:
+      viewer.update(self.population)
   
   def run(self, *_) -> None:
     generation, epoch = next(self.population.generations())

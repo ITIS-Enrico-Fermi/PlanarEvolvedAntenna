@@ -7,7 +7,7 @@ from rf.radiation import RadiationPattern
 from services.plotters import *
 from services.persistence import *
 from services.statistics import *
-from utils.amenities import plotPathAndRad, saveSvg
+from utils.amenities import plotPathAndRad, saveMiniaturesSvg
 from core.config import Config
 from core.population import Population
 from core.simulation import Simulation
@@ -17,7 +17,7 @@ from scipy.io import savemat
 
 CONFIG_FILENAME = "config.yaml"
 
-def main(doPlot: bool, graphicsOutdir: str, withBoundaries: bool, statService: IStatService, instanceNumber: int = 0):
+def main(doPlot: bool, doPlotWorld: bool, graphicsOutdir: str, withBoundaries: bool, statService: IStatService, instanceNumber: int = 0):
   signal.signal(signal.SIGINT, lambda *_: quit())
 
   logging.basicConfig(
@@ -32,24 +32,25 @@ def main(doPlot: bool, graphicsOutdir: str, withBoundaries: bool, statService: I
   
   PLOT_ROWS = 2
   PLOT_COLS = 3
-  fig = plt.figure(f"Simulation {instanceNumber}")
-  shape = fig.add_subplot(PLOT_ROWS, PLOT_COLS, 1)
-  radPatternSag = fig.add_subplot(PLOT_ROWS, PLOT_COLS, 2, projection='polar')
-  radPatternFront = fig.add_subplot(PLOT_ROWS, PLOT_COLS, 3, projection='polar')
-  fitnessGraph = fig.add_subplot(PLOT_ROWS, PLOT_COLS, 4)
-  killedGraph = fig.add_subplot(PLOT_ROWS, PLOT_COLS, 5)
-  distanceGraph = fig.add_subplot(PLOT_ROWS, PLOT_COLS, 6)
-  fig.tight_layout()
+  mainFig = plt.figure(f"Simulation {instanceNumber}")
+  shape = mainFig.add_subplot(PLOT_ROWS, PLOT_COLS, 1)
+  radPatternSag = mainFig.add_subplot(PLOT_ROWS, PLOT_COLS, 2, projection='polar')
+  radPatternFront = mainFig.add_subplot(PLOT_ROWS, PLOT_COLS, 3, projection='polar')
+  fitnessGraph = mainFig.add_subplot(PLOT_ROWS, PLOT_COLS, 4)
+  killedGraph = mainFig.add_subplot(PLOT_ROWS, PLOT_COLS, 5)
+  distanceGraph = mainFig.add_subplot(PLOT_ROWS, PLOT_COLS, 6)
+  mainFig.tight_layout()
 
-  if not graphicsOutdir:
-    PersistenceServiceClass = StubPersistenceService
-  else:
+  PersistenceServiceClass = StubPersistenceService
+  if graphicsOutdir:
     if withBoundaries:
       PersistenceServiceClass = MiniatureWithBoundariesPersistenceService
     else:
       PersistenceServiceClass = MiniaturePersistenceService
   
-  persistenceService = PersistenceServiceClass(graphicsOutdir)
+  worldView = StubLiveViewService(None)
+  if doPlotWorld:
+    worldView = WorldLiveViewer(plt.figure(f"World Live View {instanceNumber}"), 20)
 
   statService.withGraphers(
     FitnessPlotter(fitnessGraph),
@@ -62,12 +63,13 @@ def main(doPlot: bool, graphicsOutdir: str, withBoundaries: bool, statService: I
     .withService(PlanarShapePlotter(shape)) \
     .withService(RadiationPatternPlotter(radPatternFront, Gene.getRadiationPatternFrontal)) \
     .withService(RadiationPatternPlotter(radPatternSag, Gene.getRadiationPatternSagittal)) \
-    .withService(persistenceService) \
-    .withService(statService)
+    .withService(PersistenceServiceClass(graphicsOutdir)) \
+    .withService(statService) \
+    .withService(worldView)
 
   try:
     if doPlot:
-      anim = animation.FuncAnimation(fig, sim.run, interval = 10, cache_frame_data = False)
+      anim = animation.FuncAnimation(mainFig, sim.run, interval = 10, cache_frame_data = False)
       plt.show()
     else:
       while True:
@@ -85,6 +87,11 @@ if __name__ == "__main__":
 
   parser.add_argument(
     "-p", "--plot", help="View what's happening in the simulation",
+    default=False, action="store_true"
+  )
+
+  parser.add_argument(
+    "-vw", "--view-world", help="Live view of simulation's world",
     default=False, action="store_true"
   )
 
@@ -119,7 +126,7 @@ if __name__ == "__main__":
 
   statServices = [StatServiceClass(join(statsOutdir, f"stats{i}.mat")) for i in range(args.benchmark_instances)]
 
-  parallelMain = partial(main, args.plot, args.graphics_outdir, args.with_boundaries)
+  parallelMain = partial(main, args.plot, args.view_world, args.graphics_outdir, args.with_boundaries)
   with Pool(args.benchmark_instances) as p:
     statsDicts = p.starmap(parallelMain, [(statService, i) for i, statService in enumerate(statServices)])
 
