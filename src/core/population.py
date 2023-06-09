@@ -56,6 +56,7 @@ class Population:
     for _ in range(Config.GeneticAlgoTuning.iterationsNumber):
       self.generateOffspring()
       self.mutate()
+      self.cleanup()
       self.fight()
       
       self.fitnessMean = np.mean([g.fitnessCached for g in self.individuals])
@@ -77,9 +78,9 @@ class Population:
       yield self.individuals, self.generationNumber
     
   
-  def fight(self):
-    """This step filters out non-valid individuals and
-    keeps only some of them according to the turnover rate
+  def cleanup(self):
+    """
+    This step filters out non-valid individuals
     """
     oldGenerationSize = len(self.individuals)
 
@@ -93,6 +94,11 @@ class Population:
     self.killedGenesRatio = self.killedGenes / oldGenerationSize * 100
     logging.warning(f"Killed {self.killedGenes} ({self.killedGenesRatio:.1f}%) genes")
 
+  def fight(self):
+    """
+    This step puts evolutive pressure on the system by pruning
+    the worst individuals (according to turnover rate)
+    """
     survivorshipRate = 1 - Config.GeneticAlgoTuning.turnoverRate;
     survivedGenesNumber = ceil(survivorshipRate * Config.GeneticAlgoTuning.populationSize)
     self.individuals = sorted(self.individuals, reverse=True)[ : survivedGenesNumber]

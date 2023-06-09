@@ -28,7 +28,8 @@ class IGrapherService(IPlotterService):
   
   @abstractmethod
   def plot(self, population: Population) -> Dict[str, List]:
-    """plots on axes and returns a dictionary of plotted values.
+    """
+    plots on axes and returns a dictionary of plotted values.
     @return what it has just plotted in a dictionary. Keys will be used as labels.
     """
     ...
