@@ -36,7 +36,7 @@ class IGrapherService(IPlotterService):
 
 class StubPlotterService(IPlotterService):
   def plot(self, population: Population) -> None:
-    return
+    pass
 
 
 class PlanarShapePlotter(IPlotterService):
