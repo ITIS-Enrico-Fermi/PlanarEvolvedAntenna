@@ -93,7 +93,8 @@ class Population:
     self.killedGenesRatio = self.killedGenes / oldGenerationSize * 100
     logging.warning(f"Killed {self.killedGenes} ({self.killedGenesRatio:.1f}%) genes")
 
-    survivedGenesNumber = ceil(Config.GeneticAlgoTuning.turnoverRate * Config.GeneticAlgoTuning.populationSize)
+    survivorshipRate = 1 - Config.GeneticAlgoTuning.turnoverRate;
+    survivedGenesNumber = ceil(survivorshipRate * Config.GeneticAlgoTuning.populationSize)
     self.individuals = sorted(self.individuals, reverse=True)[ : survivedGenesNumber]
   
   def crossover(self, mother: Gene, father: Gene):
