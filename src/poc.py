@@ -17,7 +17,7 @@ from scipy.io import savemat
 
 CONFIG_FILENAME = "config.yaml"
 
-def main(doPlot: bool, outdir: str, withBoundaries: bool, statService: IStatService, instanceNumber: int = 0):
+def main(doPlot: bool, graphicsOutdir: str, withBoundaries: bool, statService: IStatService, instanceNumber: int = 0):
   signal.signal(signal.SIGINT, lambda *_: quit())
 
   logging.basicConfig(
@@ -29,15 +29,6 @@ def main(doPlot: bool, outdir: str, withBoundaries: bool, statService: IStatServ
   with open(CONFIG_FILENAME, "r") as f:
     Config.loadYaml(f)
 
-  if outdir is None:
-    persistenceServiceClass = StubPlotterService
-  else:
-    if withBoundaries:
-      persistenceServiceClass = MiniatureWithBoundariesPersistenceService
-    else:
-      persistenceServiceClass = MiniaturePersistenceService
-  
-  persistenceService = persistenceServiceClass(outdir)
   
   PLOT_ROWS = 2
   PLOT_COLS = 3
@@ -49,6 +40,16 @@ def main(doPlot: bool, outdir: str, withBoundaries: bool, statService: IStatServ
   killedGraph = fig.add_subplot(PLOT_ROWS, PLOT_COLS, 5)
   distanceGraph = fig.add_subplot(PLOT_ROWS, PLOT_COLS, 6)
   fig.tight_layout()
+
+  if not graphicsOutdir:
+    PersistenceServiceClass = StubPersistenceService
+  else:
+    if withBoundaries:
+      PersistenceServiceClass = MiniatureWithBoundariesPersistenceService
+    else:
+      PersistenceServiceClass = MiniaturePersistenceService
+  
+  persistenceService = PersistenceServiceClass(graphicsOutdir)
 
   statService.withGraphers(
     FitnessPlotter(fitnessGraph),
@@ -88,7 +89,7 @@ if __name__ == "__main__":
   )
 
   parser.add_argument(
-    "-o", "--outdir", help="Save each generation to an svg file inside outdir. May slow down the simulation.",
+    "-go", "--graphics-outdir", help="Graphics output folder. Save each generation to an svg file inside outdir. May slow down the simulation.",
     type=str, default=None
   )
   
@@ -98,15 +99,27 @@ if __name__ == "__main__":
   )
 
   parser.add_argument(
+    "-so", "--stats-outdir", help="Specify stats output folder.",
+    type=str, default=None
+  )
+
+  parser.add_argument(
     "-bm", "--benchmark-instances", help="Number of benchmark's paralell simulations",
     type=int, default=1
   )
 
   args = parser.parse_args()
 
-  statServices = [StatService(join("results", f"stats{i}.mat")) for i in range(args.benchmark_instances)]
+  statsOutdir = args.stats_outdir
+  if statsOutdir:
+    StatServiceClass = StatService
+  else:
+    StatServiceClass = StubStatService
+    statsOutdir = ""
 
-  parallelMain = partial(main, args.plot, args.outdir, args.with_boundaries)
+  statServices = [StatServiceClass(join(statsOutdir, f"stats{i}.mat")) for i in range(args.benchmark_instances)]
+
+  parallelMain = partial(main, args.plot, args.graphics_outdir, args.with_boundaries)
   with Pool(args.benchmark_instances) as p:
     statsDicts = p.starmap(parallelMain, [(statService, i) for i, statService in enumerate(statServices)])
 

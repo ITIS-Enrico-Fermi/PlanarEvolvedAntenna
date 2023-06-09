@@ -11,7 +11,7 @@ The main goal of this project is simulating the evolution of a planar antenna su
 A planar antenna can be represented as a path with both cartesian and polar coordinates. The latter is our case (see rod-based robots). Each segment of the polygonal chain is a polar coordinate (angle, distance) whose origin is the end-point of the previous segment. 
 
 ### Constraints
-Trhoughout the simulation (at any given time of it), every path must be contained inside a circle of diameter _outer\_diameter_ - specified in _config.yaml_ file - and must avoid an inner circle of diameter _inner\_diameter_, namely the hole for the onboard camera.
+Throughout the simulation (at any given time of it), every path must be contained inside a circle of diameter _outer\_diameter_ - specified in _config.yaml_ file - and must avoid an inner circle of diameter _inner\_diameter_, namely the hole for the onboard camera.
 ![assets/invalid_genes.png](assets/invalid_genes.png)
 
 ### Fitness (objective function)
@@ -33,10 +33,16 @@ python3 -m pip install -r requirements.txt
 Proof-of-concept:
 ```bash
 cd src
-python3 poc.py [-p] [-o OUTDIR]
+python3 poc.py [-p] [-go GRAPHICS_OUTDIR] [-b] [-so STATS_OUTDIR] [-bm INSTANCES]
 ```
 
-Where `-p` is the short option for `--plot`, whereas `-o` stands for `--outdir` (output directory where a bunch of svg files will be saved).
+Where:
+ - `-p` is the short option for `--plot`.
+ - `-go` stands for `--graphics-outdir` (output directory where a bunch of svg files will be saved). With (`-b`) or without boundaries.
+ - `-so` stands for `--stats-outdir`, namely the output folder for _statsXXX.mat_ files.
+ - `-bm` allows the user to spawn several instances of the simulation to perform a "benchmark" of the current algorithm.
+
+Get more details with `-h` or `--help` option.
 
 ## Outcome evaluation
 > Now the big question. How to interpret the simulation's results? this task can involve a vast set of knowledge. In addition, our interpretation can not only be incomplete, but also partially wrong, so take it with a grain of salt.

@@ -16,7 +16,7 @@ class IPersistenceService(Service):
 
 class StubPersistenceService(IPersistenceService):
   def save(self, population: Population) -> None:
-    return
+    pass
 
 
 class MiniaturePersistenceService(IPersistenceService):
