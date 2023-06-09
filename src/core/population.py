@@ -70,8 +70,8 @@ class Population:
       self.king = \
         self.individuals[0] if self.individuals[0].fitnessCached > self.king.fitnessCached else self.king
       
-      if self.fitnessStdDev <= np.finfo(np.float32).eps:
-        return
+      #if self.fitnessStdDev <= np.finfo(np.float32).eps:
+      #  return
 
       self.generationNumber += 1
       yield self.individuals, self.generationNumber
