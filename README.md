@@ -11,7 +11,7 @@ The main goal of this project is simulating the evolution of a planar antenna su
 A planar antenna can be represented as a path with both cartesian and polar coordinates. The latter is our case (see rod-based robots). Each segment of the polygonal chain is a polar coordinate (angle, distance) whose origin is the end-point of the previous segment. 
 
 ### Constraints
-Trhoughout the simulation (at any given time of it), every path must be contained inside a circle of diameter _outer\_diameter_ - specified in _config.yaml_ file - and must avoid an inner circle of diameter _inner\_diameter_, namely the hole for the onboard camera.
+Throughout the simulation (at any given time of it), every path must be contained inside a circle of diameter _outer\_diameter_ - specified in _config.yaml_ file - and must avoid an inner circle of diameter _inner\_diameter_, namely the hole for the onboard camera.
 ![assets/invalid_genes.png](assets/invalid_genes.png)
 
 ### Fitness (objective function)
