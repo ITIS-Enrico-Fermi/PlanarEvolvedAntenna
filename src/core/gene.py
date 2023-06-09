@@ -154,3 +154,80 @@ class Gene:
       self.fitnessCached = float("-inf")  # This gene will be discarded at the next iteration
 
     return self.fitnessCached
+
+class ValidInitGene(Gene):
+  globalSerial = 0
+  GAIN_K = 1
+  STANDARD_DEVIATION_K = 0
+
+  def __init__(self, rodEncodedGene: List[PolarCoord] = None, groundPlaneDist: float = 1):
+    self.FIRST_POINT = Point(- Config.ShapeConstraints.outerDiam / 2, 0)
+
+    self.radiationPatternSagittal = None
+    self.radiationPatternFrontal = None
+    self.fitnessCached = float("-inf")
+    self.groundPlaneDistance = np.random.uniform(
+      low = Config.ShapeConstraints.groundPlaneDistanceMin,
+      high = Config.ShapeConstraints.groundPlaneDistanceMax,
+      size = 1
+    )[0]
+
+    self.serial = Gene.globalSerial
+    Gene.globalSerial += 1
+
+    if (rodEncodedGene is not None):
+      self.rodEncoding = rodEncodedGene
+      self.polychainEncoding = polarToPolychain(
+        self.FIRST_POINT,
+        rodToPolar(self.rodEncoding)
+      )
+      self.groundPlaneDistance = groundPlaneDist
+      return
+
+    revolutionAngles = np.random.uniform(-np.pi/Config.GeneEncoding.segmentsNumber, np.pi/Config.GeneEncoding.segmentsNumber, Config.GeneEncoding.segmentsNumber)
+    
+    segmentLengths = np.random.uniform(
+      low = Config.GeneEncoding.minSegmentLen,
+      high = Config.GeneEncoding.maxSegmentLen,
+      size = Config.GeneEncoding.segmentsNumber)
+
+    self.setEncoding(revolutionAngles, segmentLengths)
+
+class BiasedInitGene(Gene):
+  globalSerial = 0
+  GAIN_K = 1
+  STANDARD_DEVIATION_K = 0
+
+  def __init__(self, rodEncodedGene: List[PolarCoord] = None, groundPlaneDist: float = 1):
+    self.FIRST_POINT = Point(- Config.ShapeConstraints.outerDiam / 2, 0)
+
+    self.radiationPatternSagittal = None
+    self.radiationPatternFrontal = None
+    self.fitnessCached = float("-inf")
+    self.groundPlaneDistance = np.random.uniform(
+      low = Config.ShapeConstraints.groundPlaneDistanceMin,
+      high = Config.ShapeConstraints.groundPlaneDistanceMax,
+      size = 1
+    )[0]
+
+    self.serial = Gene.globalSerial
+    Gene.globalSerial += 1
+
+    if (rodEncodedGene is not None):
+      self.rodEncoding = rodEncodedGene
+      self.polychainEncoding = polarToPolychain(
+        self.FIRST_POINT,
+        rodToPolar(self.rodEncoding)
+      )
+      self.groundPlaneDistance = groundPlaneDist
+      return
+
+    biasAngle = np.deg2rad(20)
+    revolutionAngles = np.random.uniform(-np.pi/Config.GeneEncoding.segmentsNumber + biasAngle, np.pi/Config.GeneEncoding.segmentsNumber + biasAngle, Config.GeneEncoding.segmentsNumber)
+    
+    segmentLengths = np.random.uniform(
+      low = Config.GeneEncoding.minSegmentLen,
+      high = Config.GeneEncoding.maxSegmentLen,
+      size = Config.GeneEncoding.segmentsNumber)
+
+    self.setEncoding(revolutionAngles, segmentLengths)

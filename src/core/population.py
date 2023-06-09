@@ -4,7 +4,7 @@ from math import ceil, floor
 from random import randrange, sample, choice, choices
 from typing import List, Tuple
 from core.config import Config
-from core.gene import Gene
+from core.gene import Gene, ValidInitGene, BiasedInitGene
 
 
 class Population:
