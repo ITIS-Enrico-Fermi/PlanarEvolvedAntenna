@@ -119,17 +119,20 @@ class Population:
   def generateOffspring(self):
     newGenerationSize = floor((1.0 - Config.GeneticAlgoTuning.turnoverRate) * Config.GeneticAlgoTuning.populationSize)
     oldGenerationSize = len(self.individuals)
+    newborns = []
 
     for _ in range(newGenerationSize // 2):
       momGene = self.extractParent()
       dadGene = self.extractParent()
       
       newGene1, newGene2 = self.crossover(momGene, dadGene)
+      
+      newborns.append(newGene1)
+      newborns.append(newGene2)
 
-      self.individuals.append(newGene1)
-      self.individuals.append(newGene2)
+    self.individuals += newborns
+    self.newbornsCounter += len(newborns)
 
-      self.newbornsCounter += 2
     
   def mutate(self):
     toMutateSize = ceil(Config.GeneticAlgoTuning.mutationRate * len(self.individuals))
