@@ -29,15 +29,6 @@ def main(doPlot: bool, graphicsOutdir: str, withBoundaries: bool, statService: I
   with open(CONFIG_FILENAME, "r") as f:
     Config.loadYaml(f)
 
-  if graphicsOutdir is None:
-    PersistenceServiceClass = StubPersistenceService
-  else:
-    if withBoundaries:
-      PersistenceServiceClass = MiniatureWithBoundariesPersistenceService
-    else:
-      PersistenceServiceClass = MiniaturePersistenceService
-  
-  persistenceService = PersistenceServiceClass(graphicsOutdir)
   
   PLOT_ROWS = 2
   PLOT_COLS = 3
@@ -49,6 +40,16 @@ def main(doPlot: bool, graphicsOutdir: str, withBoundaries: bool, statService: I
   killedGraph = fig.add_subplot(PLOT_ROWS, PLOT_COLS, 5)
   distanceGraph = fig.add_subplot(PLOT_ROWS, PLOT_COLS, 6)
   fig.tight_layout()
+
+  if not graphicsOutdir:
+    PersistenceServiceClass = StubPersistenceService
+  else:
+    if withBoundaries:
+      PersistenceServiceClass = MiniatureWithBoundariesPersistenceService
+    else:
+      PersistenceServiceClass = MiniaturePersistenceService
+  
+  persistenceService = PersistenceServiceClass(graphicsOutdir)
 
   statService.withGraphers(
     FitnessPlotter(fitnessGraph),
