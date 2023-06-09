@@ -47,6 +47,12 @@ class IStatService(Service):
     ...
 
 
+class StubStatService(IStatService):
+  def stat(self, population: Population) -> Dict[str, List]:
+    for grapher in self.graphers:
+      grapher.plot(population)
+
+
 class StatService(IStatService):
   def stat(self, population: Population) -> Dict[str, List]:
     mergedDict = {}
