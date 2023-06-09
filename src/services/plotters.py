@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 from core.population import Population
 from services.service import Service
 from matplotlib.axes import Axes
+from matplotlib.figure import Figure
 from utils.amenities import *
 
 class IPlotterService(Service):
@@ -35,8 +36,28 @@ class IGrapherService(IPlotterService):
     ...
 
 
+class ILiveViewService(Service):
+  def __init__(self, figure: Figure, updatePeriod: int = 1):
+    self.figure: Figure = figure
+    self.updatePeriod = updatePeriod
+    self.itCounter = 0
+    self.__post_init__()
+  
+  def __post_init__(self) -> Any:
+    ...
+  
+  @abstractmethod
+  def update(self, population: Population) -> None:
+    ...
+
+
 class StubPlotterService(IPlotterService):
   def plot(self, population: Population) -> None:
+    pass
+
+
+class StubLiveViewService(ILiveViewService):
+  def update(self, population: Population) -> None:
     pass
 
 
@@ -168,3 +189,13 @@ class KilledGenesPlotter(IGrapherService):
       "timeline": self.timeline,
       "killedGenes": self.killedGenes
     }
+
+
+class WorldLiveViewer(ILiveViewService):
+  def update(self, population: Population) -> None:
+    if self.itCounter % self.updatePeriod == 0:
+      self.figure.clear()
+      plotMiniatures(self.figure, population.individuals, True)
+      self.figure.show()
+
+    self.itCounter += 1

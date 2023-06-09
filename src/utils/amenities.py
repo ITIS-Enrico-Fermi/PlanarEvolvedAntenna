@@ -2,6 +2,7 @@ import math
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.collections as mc
+from matplotlib.figure import Figure
 from typing import List, Tuple, IO, Any
 from core.config import Config
 from utils.geometry import *
@@ -59,8 +60,7 @@ def plotPathAndRad(
 
   plt.title(title)
 
-def saveSvg(stream: IO[Any], generation: List[Gene], doPlotConstraints: bool):
-  fig = plt.figure()
+def plotMiniatures(fig: Figure, generation: List[Gene], doPlotConstraints: bool):
   edgeLen = math.floor(math.sqrt(len(generation)))
   axes = fig.subplots(edgeLen, edgeLen)
 
@@ -77,4 +77,7 @@ def saveSvg(stream: IO[Any], generation: List[Gene], doPlotConstraints: bool):
       plotAntennaPath(axes[i][j], generation[idx].getCartesianCoords(), pathColor, 1)
       axes[i][j].autoscale()
 
-  plt.savefig(stream, format="svg")
+def saveMiniaturesSvg(stream: IO[Any], generation: List[Gene], doPlotConstraints: bool):
+  fig = plt.figure()
+  plotMiniatures(fig, generation, doPlotConstraints)
+  fig.savefig(stream, format="svg")
