@@ -20,6 +20,7 @@ class Config:
         useNiches: bool
         worldWidth: int
         worldHeight: int
+        neighborhoodRadius: int
 
     class GeneEncoding:
         segmentsNumber: int
@@ -46,12 +47,13 @@ class Config:
         Config.GeneticAlgoTuning.useNiches = d["genetic_algo_tuning"]["use_niches"]
         Config.GeneticAlgoTuning.worldWidth = d["genetic_algo_tuning"]["world_width"]
         Config.GeneticAlgoTuning.worldHeight = d["genetic_algo_tuning"]["world_height"]
+        Config.GeneticAlgoTuning.neighborhoodRadius = d["genetic_algo_tuning"]["neighborhood_radius"]
         Config.GeneticAlgoTuning.insideCirclePoints = d["genetic_algo_tuning"]["inside_circle_points"]
         Config.GeneticAlgoTuning.notCrossingHolePoints = d["genetic_algo_tuning"]["not_crossing_hole_points"]
 
         Config.GeneEncoding.segmentsNumber = d["gene_encoding"]["segments_number"]
         Config.GeneEncoding.splineInterpolation = d["gene_encoding"]["spline_interpolation"]
-        Config.GeneEncoding.maxAngle = d["gene_encoding"]["max_angle"] / Config.GeneEncoding.segmentsNumber
+        Config.GeneEncoding.maxAngle = d["gene_encoding"]["max_angle"]
         Config.GeneEncoding.maxSegmentLen = d["gene_encoding"]["max_segment_length"]
         Config.GeneEncoding.minSegmentLen = d["gene_encoding"]["min_segment_length"]
 

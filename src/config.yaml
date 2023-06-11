@@ -13,16 +13,18 @@ genetic_algo_tuning:
   iterations_number: 400
   mutation_rate: 0.1  # rate of individuals that will be mutated at each iteration
   cut_points: 1
+
   use_niches: true
   world_width: 20
   world_height: 15
+  neighborhood_radius: 1  # intended as a Manhattan distance
   inside_circle_points: 0.5
   not_crossing_hole_points: 1
 
 gene_encoding:
-  segments_number: 10
+  segments_number: 20
   spline_interpolation: false
-  max_angle: 6.28318530718  # rad
+  max_angle: 3.14159265359  # rad
   max_segment_length: 10  # mm
   min_segment_length: 1  # mm
 ...

@@ -9,15 +9,19 @@ import logging
 from utils.geometry import polychainToCartesian, cartesianToPolychain
 
 class NichePopulation(Population):
-    def __init__(self, mutationRate: float):
-        super().__init__(Config.GeneticAlgoTuning.worldHeight * Config.GeneticAlgoTuning.worldWidth, NewGene)
+    def __init__(self, *args, **kwargs):
+        super().__init__(
+            Config.GeneticAlgoTuning.worldHeight * Config.GeneticAlgoTuning.worldWidth,
+            NewGene,
+            *args, **kwargs
+        )
         
         self.world: np.ndarray = np.array(self.individuals).reshape(
             Config.GeneticAlgoTuning.worldHeight,
             Config.GeneticAlgoTuning.worldWidth
         )
 
-        self.mutationRate = mutationRate
+        self.mutationRate = Config.GeneticAlgoTuning.mutationRate
 
     def populationSet(self) -> np.ndarray:
         # TODO: unify this property with superclass population attribute
@@ -143,5 +147,5 @@ class NichePopulation(Population):
 
 
 if __name__ == '__main__':
-    p = NichePopulation(0.05)
+    p = NichePopulation()
     p.generateOffspring()

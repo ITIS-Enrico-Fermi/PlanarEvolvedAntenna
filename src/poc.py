@@ -7,9 +7,9 @@ from rf.radiation import RadiationPattern
 from services.plotters import *
 from services.persistence import *
 from services.statistics import *
-from utils.amenities import plotPathAndRad, saveMiniaturesSvg
 from core.config import Config
 from core.population import Population
+from core.niche_population import NichePopulation
 from core.simulation import Simulation
 from multiprocessing import Pool
 from functools import partial
@@ -58,7 +58,11 @@ def main(doPlot: bool, doPlotWorld: bool, graphicsOutdir: str, withBoundaries: b
     EuclideanDistancePlotter(distanceGraph)
   )
 
-  pop = Population()
+  if Config.GeneticAlgoTuning.useNiches:
+    pop = NichePopulation()
+  else:
+    pop = Population()
+
   sim = Simulation(pop) \
     .withService(PlanarShapePlotter(shape)) \
     .withService(RadiationPatternPlotter(radPatternFront, Gene.getRadiationPatternFrontal)) \
