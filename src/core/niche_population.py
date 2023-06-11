@@ -74,8 +74,8 @@ class NichePopulation(Population):
         x = randrange(rows)
         y = randrange(cols)
         
-        sliceX = np.array(range(x-3, x+4)) % self.worldHeight
-        sliceY = np.array(range(y-3, y+4)) % self.worldWidth
+        sliceX = np.array(range(x-5, x+5)) % self.worldHeight
+        sliceY = np.array(range(y-5, y+5)) % self.worldWidth
 
         return self.world[sliceX, :][:, sliceY]
 
@@ -96,6 +96,10 @@ class NichePopulation(Population):
             if childA.isValid() and childB.isValid():
                 child = childA if childA.fitness() > childB.fitness() else childB
             
+            for (x, y), ele in np.ndenumerate(niche):
+                if not ele.isValid():
+                    niche[x][y] = child
+                    return
 
             (x, y), weakest = min(np.ndenumerate(niche), key=itemgetter(1))
             if child > weakest:
@@ -150,7 +154,7 @@ class NichePopulation(Population):
                 self.killedGenes += 1
                 niche[i][j] = Gene()
 
-        self.killedGenesRatio = self.killedGenes / niche.size
+        self.killedGenesRatio = 100 * self.killedGenes / niche.size
                 
 
     def generations(self) -> List[Gene]:
@@ -176,7 +180,7 @@ class NichePopulation(Population):
                 f"Population size: {self.world.size}"
             )
 
-            self.king = max(self.populationSet())
+            self.king = max(validPop) if len(validPop) > 0 else 0
 
             # if self.fitnessStdDev <= np.finfo(np.float32).eps:
             #     return
