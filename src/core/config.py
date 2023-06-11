@@ -18,6 +18,7 @@ class Config:
         mutationRate: float
         turnoverRate: float
         useNiches: bool
+        nichesActivationThreshold: float
         worldWidth: int
         worldHeight: int
         neighborhoodRadius: int
@@ -45,6 +46,7 @@ class Config:
         Config.GeneticAlgoTuning.mutationRate = d["genetic_algo_tuning"]["mutation_rate"]
         Config.GeneticAlgoTuning.turnoverRate = d["genetic_algo_tuning"]["turnover_rate"]
         Config.GeneticAlgoTuning.useNiches = d["genetic_algo_tuning"]["use_niches"]
+        Config.GeneticAlgoTuning.nichesActivationThreshold = d["genetic_algo_tuning"]["niches_activation_threshold"]
         Config.GeneticAlgoTuning.worldWidth = d["genetic_algo_tuning"]["world_width"]
         Config.GeneticAlgoTuning.worldHeight = d["genetic_algo_tuning"]["world_height"]
         Config.GeneticAlgoTuning.neighborhoodRadius = d["genetic_algo_tuning"]["neighborhood_radius"]

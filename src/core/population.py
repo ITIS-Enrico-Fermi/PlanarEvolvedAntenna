@@ -12,6 +12,8 @@ class Population:
     self.individuals = [gene_class() for _ in range(pop_size)]
     self.generationNumber = 0
     self.newbornsCounter = 0
+    self.fitnessStdDev = float("-inf")
+    self.fitnessMean = float("-inf")
     self.king = gene_class()
 
   def extractParent(self) -> Gene:
@@ -80,10 +82,11 @@ class Population:
     oldGenerationSize = len(self.individuals)
 
     self.individuals = list(
-    filter(
-    lambda x: x.isValid(),
-    self.individuals
-    ))
+      filter(
+        lambda x: x.isValid(),
+        self.individuals
+      )
+    )
 
     self.killedGenes = oldGenerationSize - len(self.individuals)
     self.killedGenesRatio = self.killedGenes / oldGenerationSize * 100

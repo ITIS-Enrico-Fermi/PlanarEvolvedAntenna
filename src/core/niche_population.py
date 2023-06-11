@@ -1,27 +1,48 @@
+import logging
+import numpy as np
 from typing import List
 from core.population import Population
 from core.gene import Gene, NewGene
-from random import choices, randrange, random
+from random import choice, choices, randrange, random
 from core.config import Config
-import numpy as np
 from operator import itemgetter
-import logging
-from utils.geometry import polychainToCartesian, cartesianToPolychain
+from math import sqrt, floor, ceil
 
 class NichePopulation(Population):
     def __init__(self, *args, **kwargs):
+        self.worldHeight = Config.GeneticAlgoTuning.worldHeight
+        self.worldWidth = Config.GeneticAlgoTuning.worldWidth
+
         super().__init__(
-            Config.GeneticAlgoTuning.worldHeight * Config.GeneticAlgoTuning.worldWidth,
-            NewGene,
+            self.worldHeight * self.worldWidth,
+            Gene,
             *args, **kwargs
         )
         
+        self.__post_init__()
+        
+
+    def __post_init__(self):
         self.world: np.ndarray = np.array(self.individuals).reshape(
-            Config.GeneticAlgoTuning.worldHeight,
-            Config.GeneticAlgoTuning.worldWidth
+            self.worldHeight,
+            self.worldWidth
         )
 
         self.mutationRate = Config.GeneticAlgoTuning.mutationRate
+
+    def fromPopulation(self, population: Population):
+        self.individuals = population.individuals.copy()
+        self.worldHeight = floor(sqrt(len(self.individuals)))
+        self.worldWidth = floor(sqrt(len(self.individuals)))
+        self.individuals = self.individuals[:(self.worldWidth*self.worldHeight)]
+        self.generationNumber = population.generationNumber
+        self.newbornsCounter = population.newbornsCounter
+        self.killedGenes = population.killedGenes
+        self.king = population.king
+
+        self.__post_init__()
+
+        return self
 
     def populationSet(self) -> np.ndarray:
         # TODO: unify this property with superclass population attribute
@@ -30,7 +51,7 @@ class NichePopulation(Population):
     def nicheToSet(self, niche: np.ndarray) -> np.ndarray:
         return niche.reshape(niche.size)
 
-    def extractParents(self, neigh: np.matrix):
+    def extractParents(self, neigh: np.matrix) -> List[Gene]:
         """
         Extract parents for crossover from a neighbourhood (submatrix of world).
         """
@@ -39,8 +60,6 @@ class NichePopulation(Population):
 
         fitness = [g.fitness() for g in neigh]
         fitness = [500 + f if f > float("-inf") else 0 for f in fitness]
-
-        print("Fitness: ", fitness)
 
         try:
             return choices(neigh, weights=fitness, k=2)
@@ -54,22 +73,33 @@ class NichePopulation(Population):
 
         x = randrange(rows)
         y = randrange(cols)
+        
+        sliceX = np.array(range(x-3, x+4)) % self.worldHeight
+        sliceY = np.array(range(y-3, y+4)) % self.worldWidth
 
-        return self.world[np.array(range(x-1, x+2)) % Config.GeneticAlgoTuning.worldHeight, :][:, np.array(range(y-1, y+2)) % Config.GeneticAlgoTuning.worldWidth]
+        return self.world[sliceX, :][:, sliceY]
 
     def generateOffspring(self, niche: np.ndarray):
-        mother, father = self.extractParents(niche)
-        childA, childB = self.crossover(mother, father)
+        for _ in range(ceil(Config.GeneticAlgoTuning.turnoverRate*niche.size)):
+            mother, father = self.extractParents(niche)
+            childA, childB = self.crossover(mother, father)
 
-        if not childA.isValid():
-            return
-        
-        self.newbornsCounter += 1
+            self.newbornsCounter += 1
+            
+            if not childA.isValid() and not childB.isValid():
+                continue
+            
+            if childA.isValid():
+                child = childA
+            if childB.isValid():
+                child = childB
+            if childA.isValid() and childB.isValid():
+                child = childA if childA.fitness() > childB.fitness() else childB
+            
 
-        (x, y), weakest = min(np.ndenumerate(niche), key=itemgetter(1))
-        if childA > weakest:
-            niche[x][y] = childA
-            print(f"Sub ({x}, {y}) with child A with fitness: {childA}")
+            (x, y), weakest = min(np.ndenumerate(niche), key=itemgetter(1))
+            if child > weakest:
+                niche[x][y] = child
 
     def mutate(self, niche):
         for gene in self.nicheToSet(niche):
@@ -77,8 +107,8 @@ class NichePopulation(Population):
                 continue    # Because of uniform probability
 
             mutationAngles = np.random.uniform(
-                -Config.GeneEncoding.maxAngle/2,
-                +Config.GeneEncoding.maxAngle/2,
+                -Config.GeneEncoding.maxAngle/Config.GeneEncoding.segmentsNumber,
+                +Config.GeneEncoding.maxAngle/Config.GeneEncoding.segmentsNumber,
                 Config.GeneEncoding.segmentsNumber
             )
 
@@ -107,10 +137,12 @@ class NichePopulation(Population):
             )
 
             gene.setEncoding(newAngles, newLengths)
-            gene.setGroundPlaneDistance(mutationGpDistance)
-            
+            gene.setGroundPlaneDistance((mutationGpDistance + gene.groundPlaneDistance) / 2)            
 
-    def fight(self, niche: np.ndarray):
+    def cleanup(self, niche: np.ndarray):
+        """
+        This step filters out non-valid individuals
+        """
         self.killedGenes = 0
 
         for (i, j), gene in np.ndenumerate(niche):
@@ -126,10 +158,17 @@ class NichePopulation(Population):
             niche = self.sampleNiche()
             self.generateOffspring(niche)
             self.mutate(niche)
-            self.fight(niche)
+            self.cleanup(niche)
 
-            self.fitnessMean = np.mean([g.fitness() for g in self.populationSet()])
-            self.fitnessStdDev = np.std([g.fitness() for g in self.populationSet()])
+            validPop = list(
+                filter(
+                    lambda x: x.isValid(),
+                    self.populationSet().tolist()
+                )
+            )
+
+            self.fitnessMean = np.mean([g.fitness() for g in validPop])
+            self.fitnessStdDev = np.std([g.fitness() for g in validPop])
             logging.info(
                 f"\nFitness:\n"
                 f"\tMean: {self.fitnessMean:.4f}\n"
@@ -139,11 +178,11 @@ class NichePopulation(Population):
 
             self.king = max(self.populationSet())
 
-            if self.fitnessStdDev <= np.finfo(np.float32).eps:
-                return
+            # if self.fitnessStdDev <= np.finfo(np.float32).eps:
+            #     return
 
             self.generationNumber += 1
-            yield sorted(self.populationSet().tolist(), reverse=True), self.generationNumber
+            yield sorted(validPop, reverse=True), self.generationNumber
 
 
 if __name__ == '__main__':

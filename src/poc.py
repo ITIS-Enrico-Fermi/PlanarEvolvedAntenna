@@ -58,12 +58,8 @@ def main(doPlot: bool, doPlotWorld: bool, graphicsOutdir: str, withBoundaries: b
     EuclideanDistancePlotter(distanceGraph)
   )
 
-  if Config.GeneticAlgoTuning.useNiches:
-    pop = NichePopulation()
-  else:
-    pop = Population()
-
-  sim = Simulation(pop) \
+  pop = Population()
+  sim = Simulation(pop, Config.GeneticAlgoTuning.useNiches, Config.GeneticAlgoTuning.nichesActivationThreshold) \
     .withService(PlanarShapePlotter(shape)) \
     .withService(RadiationPatternPlotter(radPatternFront, Gene.getRadiationPatternFrontal)) \
     .withService(RadiationPatternPlotter(radPatternSag, Gene.getRadiationPatternSagittal)) \

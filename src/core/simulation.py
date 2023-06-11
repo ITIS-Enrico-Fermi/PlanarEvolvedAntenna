@@ -1,17 +1,21 @@
 import logging
 from typing import List
+from core.niche_population import NichePopulation
 from services.service import *
 from services.plotters import *
 from services.persistence import *
 from services.statistics import *
 
 class Simulation:
-  def __init__(self, population: Population):
+  def __init__(self, population: Population, useNiches: bool = False, nichesActivationTh: float = 1):
     self.population = population
     self.plotterServices: List[IPlotterService] = list()
     self.persistenceServices: List[IPersistenceService] = list()
     self.statServices: List[IStatService] = list()
     self.liveViewers: List[ILiveViewService] = list()
+    self.useNiches = useNiches
+    self.nichesActivationTh = nichesActivationTh
+    self.nicheEn = False
 
   def withService(self, service: Service) -> Any:
     if isinstance(service, IPlotterService):
@@ -44,6 +48,10 @@ class Simulation:
       viewer.update(self.population)
   
   def run(self, *_) -> None:
+    if self.useNiches and not self.nicheEn and self.population.fitnessMean > self.nichesActivationTh:
+      self.population = NichePopulation().fromPopulation(self.population)
+      self.nicheEn = True
+    
     generation, epoch = next(self.population.generations())
 
     logging.info(f"Epoch: {epoch}")
