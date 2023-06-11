@@ -139,8 +139,8 @@ class Population:
 
     for gene in genesToMutate:
       mutationAngles = np.random.uniform(
-        -Config.GeneEncoding.maxAngle/2,
-        +Config.GeneEncoding.maxAngle/2,
+        -Config.GeneEncoding.maxAngle / Config.GeneEncoding.segmentsNumber,
+        +Config.GeneEncoding.maxAngle / Config.GeneEncoding.segmentsNumber,
         Config.GeneEncoding.segmentsNumber
       )
 
@@ -169,4 +169,4 @@ class Population:
       )
 
       gene.setEncoding(newAngles, newLengths)
-      gene.setGroundPlaneDistance(mutationGpDistance)
+      gene.setGroundPlaneDistance((mutationGpDistance + gene.groundPlaneDistance) / 2)
