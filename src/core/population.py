@@ -8,11 +8,11 @@ from core.gene import Gene, ValidInitGene, BiasedInitGene
 
 
 class Population:
-  def __init__(self, pop_size: int = Config.GeneticAlgoTuning.populationSize):
-    self.individuals = [Gene() for _ in range(pop_size)]
+  def __init__(self, pop_size: int = Config.GeneticAlgoTuning.populationSize, gene_class = Gene):
+    self.individuals = [gene_class() for _ in range(pop_size)]
     self.generationNumber = 0
     self.newbornsCounter = 0
-    self.king = Gene()
+    self.king = gene_class()
 
   def extractParent(self) -> Gene:
     """
@@ -26,17 +26,6 @@ class Population:
     """
 
     return choice(self.individuals)
-  
-  def extractParentFitness(self) -> Gene:
-    """
-    Extracts a parent from the population. The likelihood of extraction is proportional to gene fitness.
-    """
-
-    fitness = [g.fitness() for g in self.individuals]  # Can be cached, thus optimized
-    fitness = [f + 500 if f > float("-inf") else 0 for f in fitness] # Increment trick
-
-    return choices(self.individuals, weights=fitness)[0]
-
 
   def selectParents(self) -> List[Tuple[Gene]]:
     """
@@ -46,10 +35,16 @@ class Population:
 
     pop_size = len(self.individuals)
     parents_num = pop_size // 2
-    
-    parents = [
-      (self.extractParent(pop_size), self.extractParent(pop_size)) for _ in range(parents_num)
-    ]
+  
+  def extractParentFitness(self) -> Gene:
+    """
+    Extracts a parent from the population. The likelihood of extraction is proportional to gene fitness.
+    """
+
+    fitness = [g.fitness() for g in self.individuals]    # Can be cached, thus optimized
+    fitness = [f + 500 if f > float("-inf") else 0 for f in fitness] # Increment trick
+
+    return choices(self.individuals, weights=fitness)[0]
 
 
   def generations(self) -> Tuple[List[Gene], int]:
@@ -69,8 +64,8 @@ class Population:
       )
 
       self.king = \
-        self.individuals[0] if self.individuals[0].fitnessCached > self.king.fitnessCached else self.king
-      
+          self.individuals[0] if self.individuals[0].fitnessCached > self.king.fitnessCached else self.king
+    
       #if self.fitnessStdDev <= np.finfo(np.float32).eps:
       #  return
 
@@ -85,9 +80,9 @@ class Population:
     oldGenerationSize = len(self.individuals)
 
     self.individuals = list(
-      filter(
-      lambda x: x.isValid(),
-      self.individuals
+    filter(
+    lambda x: x.isValid(),
+    self.individuals
     ))
 
     self.killedGenes = oldGenerationSize - len(self.individuals)
@@ -138,13 +133,20 @@ class Population:
     toMutateSize = ceil(Config.GeneticAlgoTuning.mutationRate * len(self.individuals))
     genesToMutate = sample(self.individuals, k = toMutateSize)
 
+  def mutate(self):
+    toMutateSize = ceil(Config.GeneticAlgoTuning.mutationRate * len(self.individuals))
+    genesToMutate = sample(self.individuals, k = toMutateSize)
+
     for gene in genesToMutate:
-      mutationAngles = (np.random.rand(Config.GeneEncoding.segmentsNumber) - 0.5) \
-        * Config.GeneEncoding.maxAngle
+      mutationAngles = np.random.uniform(
+        -Config.GeneEncoding.maxAngle/2,
+        +Config.GeneEncoding.maxAngle/2,
+        Config.GeneEncoding.segmentsNumber
+      )
 
       mutationLengths = np.random.uniform(
-        low = - (Config.GeneEncoding.minSegmentLen + Config.GeneEncoding.maxSegmentLen) / 2,
-        high = (Config.GeneEncoding.minSegmentLen + Config.GeneEncoding.maxSegmentLen) / 2,
+        low = - (Config.GeneEncoding.maxSegmentLen - Config.GeneEncoding.minSegmentLen) / 2,
+        high = (Config.GeneEncoding.maxSegmentLen - Config.GeneEncoding.minSegmentLen) / 2,
         size = Config.GeneEncoding.segmentsNumber
       )
 

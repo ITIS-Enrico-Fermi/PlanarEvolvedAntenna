@@ -16,11 +16,13 @@ genetic_algo_tuning:
   use_niches: true
   world_width: 20
   world_height: 15
+  inside_circle_points: 0.5
+  not_crossing_hole_points: 1
 
 gene_encoding:
-  segments_number: 20
+  segments_number: 10
   spline_interpolation: false
-  max_angle: 3.14159265359  # rad
+  max_angle: 6.28318530718  # rad
   max_segment_length: 10  # mm
   min_segment_length: 1  # mm
 ...

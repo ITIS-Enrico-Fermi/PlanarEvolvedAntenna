@@ -36,29 +36,29 @@ def plotRadiationPatternSlice(axes: plt.Axes, radiation: RadiationPattern):
   axes.plot(radiation.thetasRad, radiation.gainsMw)
 
 def plotPathAndRad(
-    title: str,
-    polychain: List[Segment],
-    radiationSagittal: RadiationPattern,
-    radiationFrontal: RadiationPattern,
-    groundPlaneDistance: float,
-    axes: Tuple[plt.Axes, plt.Axes, plt.Axes]
-  ) -> None:
-  ax, radiSag, radiFront = axes
-  ax.axis("equal")
-  ax.clear()
-  radiSag.clear()
-  radiFront.clear()
+      title: str,
+      polychain: List[Segment],
+      radiationSagittal: RadiationPattern,
+      radiationFrontal: RadiationPattern,
+      groundPlaneDistance: float,
+      axes: Tuple[plt.Axes, plt.Axes, plt.Axes]
+    ) -> None:
+    ax, radiSag, radiFront = axes
+    ax.axis("equal")
+    ax.clear()
+    radiSag.clear()
+    radiFront.clear()
 
-  plotCansatBottomProfile(ax)
-  plotAntennaPath(ax, polychain)
+    plotCansatBottomProfile(ax)
+    plotAntennaPath(ax, polychain)
 
-  plotCansatProfile(radiSag, max(radiationSagittal.gainsMw), -groundPlaneDistance/30)
-  plotRadiationPatternSlice(radiSag, radiationSagittal)
+    plotCansatProfile(radiSag, max(radiationSagittal.gainsMw), -groundPlaneDistance/30)
+    plotRadiationPatternSlice(radiSag, radiationSagittal)
 
-  plotCansatProfile(radiFront, max(radiationFrontal.gainsMw), -groundPlaneDistance/30)
-  plotRadiationPatternSlice(radiFront, radiationFrontal)
+    plotCansatProfile(radiFront, max(radiationFrontal.gainsMw), -groundPlaneDistance/30)
+    plotRadiationPatternSlice(radiFront, radiationFrontal)
 
-  plt.title(title)
+    plt.title(title)
 
 def plotMiniatures(fig: Figure, generation: List[Gene], doPlotConstraints: bool):
   edgeLen = math.floor(math.sqrt(len(generation)))
