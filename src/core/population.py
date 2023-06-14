@@ -148,8 +148,8 @@ class Population:
       )
 
       mutationLengths = np.random.uniform(
-        low = - (Config.GeneEncoding.maxSegmentLen - Config.GeneEncoding.minSegmentLen) / 2,
-        high = (Config.GeneEncoding.maxSegmentLen - Config.GeneEncoding.minSegmentLen) / 2,
+        low = - (Config.GeneEncoding.maxSegmentLen - Config.GeneEncoding.minSegmentLen) / Config.GeneEncoding.segmentsNumber,
+        high = (Config.GeneEncoding.maxSegmentLen - Config.GeneEncoding.minSegmentLen) / Config.GeneEncoding.segmentsNumber,
         size = Config.GeneEncoding.segmentsNumber
       )
 

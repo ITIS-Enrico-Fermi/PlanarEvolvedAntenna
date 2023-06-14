@@ -111,14 +111,14 @@ class NichePopulation(Population):
                 continue    # Because of uniform probability
 
             mutationAngles = np.random.uniform(
-                -Config.GeneEncoding.maxAngle/Config.GeneEncoding.segmentsNumber,
-                +Config.GeneEncoding.maxAngle/Config.GeneEncoding.segmentsNumber,
+                -Config.GeneEncoding.maxAngle / Config.GeneEncoding.segmentsNumber,
+                +Config.GeneEncoding.maxAngle / Config.GeneEncoding.segmentsNumber,
                 Config.GeneEncoding.segmentsNumber
             )
 
             mutationLengths = np.random.uniform(
-                low = - (Config.GeneEncoding.maxSegmentLen - Config.GeneEncoding.minSegmentLen) / 2,
-                high = (Config.GeneEncoding.maxSegmentLen - Config.GeneEncoding.minSegmentLen) / 2,
+                low = - (Config.GeneEncoding.maxSegmentLen - Config.GeneEncoding.minSegmentLen) / Config.GeneEncoding.segmentsNumber,
+                high = (Config.GeneEncoding.maxSegmentLen - Config.GeneEncoding.minSegmentLen) / Config.GeneEncoding.segmentsNumber,
                 size = Config.GeneEncoding.segmentsNumber
             )
 
